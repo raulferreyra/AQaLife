@@ -1,15 +1,15 @@
 package com.crediweb.aqualife
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import android.widget.Button
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.textfield.TextInputEditText
 
 /**
  * A simple [Fragment] subclass.
@@ -17,43 +17,59 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class SetupFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var inputAltura: TextInputEditText
+    private lateinit var inputPeso: TextInputEditText
+    private lateinit var inputFechaNac: TextInputEditText
+    private lateinit var btnGuardar: Button
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_setup, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SetupFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SetupFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        inputAltura = view.findViewById(R.id.inputAltura)
+        inputPeso = view.findViewById(R.id.inputPeso)
+        inputFechaNac = view.findViewById(R.id.inputFechaNac)
+        btnGuardar = view.findViewById(R.id.btnGuardar)
+
+        btnGuardar.setOnClickListener {
+            guardarDatosYVolverAlDashboard()
+        }
+    }
+
+    private fun guardarDatosYVolverAlDashboard() {
+        val alturaStr = inputAltura.text?.toString()?.trim()
+        val pesoStr = inputPeso.text?.toString()?.trim()
+        val fechaStr = inputFechaNac.text?.toString()?.trim()
+
+        if (alturaStr.isNullOrEmpty() || pesoStr.isNullOrEmpty() || fechaStr.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val alturaCm = alturaStr.toFloatOrNull()
+        val pesoKg = pesoStr.toFloatOrNull()
+
+        if (alturaCm == null || pesoKg == null || alturaCm <= 0f || pesoKg <= 0f) {
+            Toast.makeText(requireContext(), "Revisa peso y talla", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val prefs = requireContext().getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putFloat("altura_cm", alturaCm)
+            .putFloat("peso_kg", pesoKg)
+            .putString("fecha_nac", fechaStr)
+            .apply()
+
+        // Volver al Dashboard (HomeFragment)
+        findNavController().navigateUp()
     }
 }
