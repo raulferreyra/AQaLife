@@ -16,4 +16,10 @@
         android:name="com.crediweb.aqualife.ui.personal_info.PersonalInfoFragment"
         android:label="@string/menu_personal_info"
         tools:layout="@layout/fragment_personal_info" />
+
+    <fragment
+        android:id="@+id/nav_setup"
+        android:name="com.crediweb.aqualife.ui.setup.SetupFragment"
+        android:label="@string/menu_personal_info"
+        tools:layout="@layout/fragment_setup" />
 </navigation>
