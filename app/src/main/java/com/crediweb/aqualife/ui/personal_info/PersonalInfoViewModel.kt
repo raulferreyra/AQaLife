@@ -1,13 +1,13 @@
-package com.crediweb.aqualife.ui.gallery
+package com.crediweb.aqualife.ui.personal_info
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class GalleryViewModel : ViewModel() {
+class PersonalInfoViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is gallery Fragment"
+        value = "This is personal Info Fragment"
     }
     val text: LiveData<String> = _text
 }

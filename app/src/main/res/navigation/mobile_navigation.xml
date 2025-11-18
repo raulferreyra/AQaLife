@@ -12,14 +12,8 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.crediweb.aqualife.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.crediweb.aqualife.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_personal_info"
+        android:name="com.crediweb.aqualife.ui.personal_info.PersonalInfoFragment"
+        android:label="@string/menu_personal_info"
+        tools:layout="@layout/fragment_personal_info" />
 </navigation>
