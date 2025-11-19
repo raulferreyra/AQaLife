@@ -62,7 +62,7 @@ class ImcGaugeView @JvmOverloads constructor(
         }
 
         // Rango bajo peso
-        drawSegment(10f, 18.5f, Color.parseColor("#FFE082")) // amarillo claro
+        drawSegment(10f, 18.5f, Color.parseColor("#A5CBD6")) // azul
         // Normal
         drawSegment(18.5f, 24.9f, Color.parseColor("#A5D6A7")) // verde
         // Sobrepeso
@@ -70,7 +70,7 @@ class ImcGaugeView @JvmOverloads constructor(
         // Obesidad I
         drawSegment(29.9f, 34.9f, Color.parseColor("#FFCC80")) // naranja
         // Obesidad II / III
-        drawSegment(34.9f, 40f, Color.parseColor("#EF9A9A")) // rojo suave
+        drawSegment(34.9f, 40f, Color.parseColor("#EF9A9A")) // rojo
 
         // Marcador del IMC
         val markerX = xForImc(imc.toFloat())
