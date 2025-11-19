@@ -16,6 +16,5 @@
         android:contentDescription="@string/app_name"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
-        android:padding="8dp"
         app:srcCompat="@drawable/logo_aqualife" />
 </LinearLayout>
