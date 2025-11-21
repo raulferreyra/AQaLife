@@ -34,6 +34,14 @@ class HomeFragment : Fragment() {
         imcGauge = view.findViewById(R.id.imcGauge)
 
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val freqMin = prefs.getInt(KEY_FREQ_MINUTOS, 60)
+
+        val notificacionesPorDia = when (freqMin) {
+            30 -> 20
+            60 -> 10
+            120 -> 5
+            else -> 10
+        }
 
         val tieneDatos = prefs.contains(KEY_ALTURA) && prefs.contains(KEY_PESO)
 
@@ -49,6 +57,14 @@ class HomeFragment : Fragment() {
 
         val imc = calcularImc(pesoKg, alturaCm)
         val rec = obtenerRecomendacion(imc)
+
+        val litrosObjetivo = (rec.litrosMin + rec.litrosMax) / 2.0
+        val mlTotales = litrosObjetivo * 1000.0
+        val mlPorNotificacion = mlTotales / notificacionesPorDia
+
+        prefs.edit()
+            .putFloat("ml_por_notificacion", mlPorNotificacion.toFloat())
+            .apply()
 
         // Bloque de IMC + recomendación (ARRIBA)
         val textoImc = """
@@ -122,5 +138,6 @@ class HomeFragment : Fragment() {
         private const val KEY_ALTURA = "altura_cm"
         private const val KEY_PESO = "peso_kg"
         private const val KEY_FECHA = "fecha_nac"
+        private const val KEY_FREQ_MINUTOS = "60"
     }
 }
