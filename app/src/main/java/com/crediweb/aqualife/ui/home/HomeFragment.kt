@@ -1,6 +1,9 @@
 package com.crediweb.aqualife.ui.home
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.crediweb.aqualife.R
+import com.crediweb.aqualife.WaterReminderReceiver
 import com.crediweb.aqualife.databinding.FragmentHomeBinding
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
@@ -132,6 +137,43 @@ class HomeFragment : Fragment() {
             )
         }
     }
+
+    private fun programarNotificaciones(freqMin: Int) {
+        val context = requireContext()
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, WaterReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+
+            // si ya pasó las 19:00, empezamos mañana
+            if (get(Calendar.HOUR_OF_DAY) >= 19) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+
+        val intervaloMs = freqMin * 60 * 1000L
+
+        // setRepeating es suficiente para el trabajo del curso
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            intervaloMs,
+            pendingIntent
+        )
+    }
+
 
     companion object {
         private const val PREFS_NAME = "imc_prefs"
