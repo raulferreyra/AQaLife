@@ -48,13 +48,13 @@ class HomeFragment : Fragment() {
         val fechaNac = prefs.getString(KEY_FECHA, "-")
 
         val imc = calcularImc(pesoKg, alturaCm)
-        val (categoria, aguaLitros, vasos) = obtenerRecomendacion(imc)
+        val rec = obtenerRecomendacion(imc)
 
         // Bloque de IMC + recomendación (ARRIBA)
         val textoImc = """
             IMC: ${"%.2f".format(imc)}
-            Categoría: $categoria
-            Agua recomendada: $aguaLitros ($vasos)
+            Categoría: ${rec.categoria}
+            Agua recomendada: ${rec.texto}
         """.trimIndent()
         txtResumenImc.text = textoImc
 
@@ -75,14 +75,45 @@ class HomeFragment : Fragment() {
         return (pesoKg / (tallaM * tallaM)).toDouble()
     }
 
-    private fun obtenerRecomendacion(imc: Double): Triple<String, String, String> {
+    data class RecomendacionAgua(
+        val categoria: String,
+        val texto: String,     // "2.5 – 3 L (10 – 12 vasos)"
+        val litrosMin: Double,
+        val litrosMax: Double
+    )
+
+    private fun obtenerRecomendacion(imc: Double): RecomendacionAgua  {
         return when {
-            imc < 18.5 -> Triple("Bajo peso", "1.5 – 2 L", "6 – 8 vasos")
-            imc < 24.9 -> Triple("Normal", "2 – 2.5 L", "8 – 10 vasos")
-            imc < 29.9 -> Triple("Sobrepeso", "2.5 – 3 L", "10 – 12 vasos")
-            imc < 34.9 -> Triple("Obesidad I", "3 – 3.5 L", "12 – 14 vasos")
-            imc < 39.9 -> Triple("Obesidad II", "3.5 – 4 L", "14 – 16 vasos")
-            else       -> Triple("Obesidad III", "4 – 4.5 L", "16 – 18 vasos")
+            imc < 18.5 -> RecomendacionAgua(
+                "Bajo peso",
+                "1.5 – 2 L (6 – 8 vasos)",
+                1.5, 2.0
+            )
+            imc < 24.9 -> RecomendacionAgua(
+                "Normal",
+                "2 – 2.5 L (8 – 10 vasos)",
+                2.0, 2.5
+            )
+            imc < 29.9 -> RecomendacionAgua(
+                "Sobrepeso",
+                "2.5 – 3 L (10 – 12 vasos)",
+                2.5, 3.0
+            )
+            imc < 34.9 -> RecomendacionAgua(
+                "Obesidad I",
+                "3 – 3.5 L (12 – 14 vasos)",
+                3.0, 3.5
+            )
+            imc < 39.9 -> RecomendacionAgua(
+                "Obesidad II",
+                "3.5 – 4 L (14 – 16 vasos)",
+                3.5, 4.0
+            )
+            else -> RecomendacionAgua(
+                "Obesidad III",
+                "4 – 4.5 L (16 – 18 vasos)",
+                4.0, 4.5
+            )
         }
     }
 
