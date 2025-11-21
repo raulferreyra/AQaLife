@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/nav_personal_info"
-        android:name="com.crediweb.aqualife.ui.personal_info.PersonalInfoFragment"
+        android:name="com.crediweb.aqualife.ui.personalinfo.PersonalInfoFragment"
         android:label="@string/menu_personal_info"
         tools:layout="@layout/fragment_personal_info" />
 
