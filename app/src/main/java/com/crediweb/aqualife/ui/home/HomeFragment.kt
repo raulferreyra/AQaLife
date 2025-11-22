@@ -10,11 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.crediweb.aqualife.R
 import com.crediweb.aqualife.WaterReminderReceiver
-import com.crediweb.aqualife.databinding.FragmentHomeBinding
 import java.util.Calendar
 
 class HomeFragment : Fragment() {
@@ -22,6 +20,9 @@ class HomeFragment : Fragment() {
     private lateinit var txtResumenImc: TextView
     private lateinit var txtResumenDatos: TextView
     private lateinit var imcGauge: ImcGaugeView
+
+    private lateinit var txtPerimetro: TextView
+    private lateinit var txtRiesgoPerimetro: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,8 +39,31 @@ class HomeFragment : Fragment() {
         txtResumenDatos = view.findViewById(R.id.txtResumenDatos)
         imcGauge = view.findViewById(R.id.imcGauge)
 
+        txtPerimetro = view.findViewById(R.id.txtPerimetro)
+        txtRiesgoPerimetro = view.findViewById(R.id.txtRiesgoPerimetro)
+
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val freqMin = prefs.getInt(KEY_FREQ_MINUTOS, 60)
+
+        val perimetro = prefs.getFloat("perimetro_abd", 0f)
+
+        if (perimetro > 0f) {
+            val textoPerimetro = "Perímetro abdominal: ${"%.1f".format(perimetro)} cm"
+            txtPerimetro.text = textoPerimetro
+
+            val riesgo = when {
+                perimetro < 80f -> "Riesgo bajo por grasa abdominal."
+                perimetro < 94f -> "Riesgo moderado por grasa abdominal."
+                else            -> "Riesgo alto por grasa abdominal."
+            }
+            txtRiesgoPerimetro.text = riesgo
+
+            txtPerimetro.visibility = View.VISIBLE
+            txtRiesgoPerimetro.visibility = View.VISIBLE
+        } else {
+            txtPerimetro.visibility = View.GONE
+            txtRiesgoPerimetro.visibility = View.GONE
+        }
 
         val notificacionesPorDia = when (freqMin) {
             30 -> 20
@@ -70,6 +94,8 @@ class HomeFragment : Fragment() {
         prefs.edit()
             .putFloat("ml_por_notificacion", mlPorNotificacion.toFloat())
             .apply()
+
+        programarNotificaciones(freqMin)
 
         // Bloque de IMC + recomendación (ARRIBA)
         val textoImc = """
@@ -140,7 +166,7 @@ class HomeFragment : Fragment() {
 
     private fun programarNotificaciones(freqMin: Int) {
         val context = requireContext()
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
 
         val intent = Intent(context, WaterReminderReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
