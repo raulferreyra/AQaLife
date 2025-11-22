@@ -1,3 +1,65 @@
-.vscode
-node_modules
-.idea
+# ===============================
+# Android / Gradle
+# ===============================
+*.iml
+.gradle/
+local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Keystore (MUY IMPORTANTE)
+*.jks
+*.keystore
+*.key
+keystore.properties
+
+# Build outputs
+/build/
+app/build/
+*/build/
+
+# APK / AAB
+*.apk
+*.ap_
+*.aab
+
+# Proguard
+proguard/*
+
+# Signing
+signing.properties
+
+# NDk / CMake
+.cxx/
+
+# ===============================
+# Android Studio
+# ===============================
+.idea/
+*.orig
+
+# ===============================
+# Misc
+# ===============================
+.DS_Store
+*.log
+
+# ===============================
+# Node / Web (por si usas algo web)
+# ===============================
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# VSCode (opcional)
+.vscode/
+
+# ===============================
+# Kotlin / Java
+# ===============================
+out/
