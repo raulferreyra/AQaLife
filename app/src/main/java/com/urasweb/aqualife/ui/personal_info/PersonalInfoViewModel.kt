@@ -1,4 +1,4 @@
-package com.crediweb.aqualife.ui.personal_info
+package com.urasweb.aqualife.ui.personal_info
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -1,4 +1,4 @@
-package com.crediweb.aqualife
+package com.urasweb.aqualife
 
 import org.junit.Test
 

@@ -28,7 +28,7 @@
             android:textSize="16sp"
             android:paddingBottom="8dp" />
 
-        <com.crediweb.aqualife.ui.home.ImcGaugeView
+        <com.urasweb.aqualife.ui.home.ImcGaugeView
             android:id="@+id/imcGauge"
             android:layout_width="match_parent"
             android:layout_height="80dp"

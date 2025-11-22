@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.crediweb.aqualife"
+    namespace = "com.urasweb.aqualife"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.crediweb.aqualife"
+        applicationId = "com.urasweb.aqualife"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

@@ -1,4 +1,4 @@
-package com.crediweb.aqualife.ui.personalinfo
+package com.urasweb.aqualife.ui.personalinfo
 
 import android.content.Context
 import android.os.Bundle
@@ -12,7 +12,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.crediweb.aqualife.R
+import com.urasweb.aqualife.R
 
 class PersonalInfoFragment : Fragment() {
 

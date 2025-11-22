@@ -1,4 +1,4 @@
-package com.crediweb.aqualife.ui.home
+package com.urasweb.aqualife.ui.home
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -11,8 +11,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.crediweb.aqualife.R
-import com.crediweb.aqualife.WaterReminderReceiver
+import com.urasweb.aqualife.R
+import com.urasweb.aqualife.WaterReminderReceiver
 import java.util.Calendar
 
 class HomeFragment : Fragment() {

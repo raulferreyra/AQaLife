@@ -1,4 +1,4 @@
-package com.crediweb.aqualife.ui.setup
+package com.urasweb.aqualife.ui.setup
 
 import android.content.Context
 import android.os.Bundle
@@ -9,7 +9,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.crediweb.aqualife.R
+import com.urasweb.aqualife.R
 import com.google.android.material.textfield.TextInputEditText
 
 /**

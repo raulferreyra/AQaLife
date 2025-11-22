@@ -1,4 +1,4 @@
-package com.crediweb.aqualife
+package com.urasweb.aqualife
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

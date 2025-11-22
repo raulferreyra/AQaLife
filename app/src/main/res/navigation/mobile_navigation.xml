@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.crediweb.aqualife.ui.home.HomeFragment"
+        android:name="com.urasweb.aqualife.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_personal_info"
-        android:name="com.crediweb.aqualife.ui.personalinfo.PersonalInfoFragment"
+        android:name="com.urasweb.aqualife.ui.personalinfo.PersonalInfoFragment"
         android:label="@string/menu_personal_info"
         tools:layout="@layout/fragment_personal_info" />
 
     <fragment
         android:id="@+id/nav_setup"
-        android:name="com.crediweb.aqualife.ui.setup.SetupFragment"
+        android:name="com.urasweb.aqualife.ui.setup.SetupFragment"
         android:label="@string/menu_personal_info"
         tools:layout="@layout/fragment_setup" />
 </navigation>
