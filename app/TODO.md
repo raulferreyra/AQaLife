@@ -1,0 +1,13 @@
+- [ ] Ajustar icono de la app
+- [ ] Ajustar screensplash
+- [X] Revisar notificaciones en Android 14
+- [ ] Corregir notificaciones, no indicar mL, sino tazas
+- [ ] Agregar Sexo
+- [ ] Corregir medidas y pesos máximos y mínimos
+- [ ] Corregir medidas de F. de Nacimiento
+- [ ] Corregir medidas de Perímetro abdominal
+- [ ] Siguiente versión:
+  - [ ] Agregar gráficos (Semanales)
+  - [ ] Agregar Base de datos
+  - [ ] Agregar función de Sincronización (BD local con BD nube)
+  - [ ] Agregar Otras medidas
