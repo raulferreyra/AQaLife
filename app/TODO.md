@@ -1,5 +1,6 @@
+- [X] Agregar Readme
 - [ ] Ajustar icono de la app
-- [ ] Ajustar screensplash
+- [X] Ajustar screensplash
 - [X] Revisar notificaciones en Android 14
 - [ ] Corregir notificaciones, no indicar mL, sino tazas
 - [ ] Agregar Sexo
