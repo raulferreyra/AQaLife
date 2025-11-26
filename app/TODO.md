@@ -4,14 +4,14 @@
 - [X] Ajustar screensplash
 - [X] Revisar notificaciones en Android 14
 - [ ] Corregir notificaciones, no indicar mL, sino tazas
-- [ ] Agregar Sexo
-- [ ] Validar consistencia de datos (volver a Setup si faltan datos críticos)
-- [ ] Redondear IMC y valores mostrados a formato presentable (2 decimales fijo)
-- [ ] Corregir medidas y pesos máximos y mínimos
-- [ ] Corregir medidas de F. de Nacimiento
+- [X] Agregar Sexo
+- [X] Validar consistencia de datos (volver a Setup si faltan datos críticos)
+- [X] Redondear IMC y valores mostrados a formato presentable (2 decimales fijo)
+- [X] Corregir medidas y pesos máximos y mínimos
+- [X] Corregir medidas de F. de Nacimiento
 - [ ] Corregir medidas de Perímetro abdominal
-- [ ] Revisar textos, ortografía y consistencia de nombres
-- [ ] Actualizar README del proyecto (explicar funcionamiento)
+- [X] Revisar textos, ortografía y consistencia de nombres
+- [X] Actualizar README del proyecto (explicar funcionamiento)
 - [ ] Siguiente versión:
   - [ ] Sección de medidas (Globales / imperiales) 
   - [ ] Agregar gráficos (Semanales)

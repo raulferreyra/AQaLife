@@ -62,9 +62,9 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 - [X] Mejorar SplashScreen
 - [X] Revisar notificaciones en Android 14
 - [ ] Corregir notificaciones (mostrar tazas en vez de mL)
-- [ ] Agregar campo **Sexo**
-- [ ] Validación revisada de medidas y pesos
-- [ ] Validación revisada de fecha de nacimiento
+- [X] Agregar campo **Sexo**
+- [X] Validación revisada de medidas y pesos
+- [X] Validación revisada de fecha de nacimiento
 - [ ] Validaciones de perímetro abdominal
 
 ### 🌟 Nuevas funciones (Sprint 2)
