@@ -3,11 +3,19 @@
 - [X] Revisar notificaciones en Android 14
 - [ ] Corregir notificaciones, no indicar mL, sino tazas
 - [ ] Agregar Sexo
+- [ ] Validar consistencia de datos (volver a Setup si faltan datos críticos)
+- [ ] Redondear IMC y valores mostrados a formato presentable (2 decimales fijo)
 - [ ] Corregir medidas y pesos máximos y mínimos
 - [ ] Corregir medidas de F. de Nacimiento
 - [ ] Corregir medidas de Perímetro abdominal
+- [ ] Revisar textos, ortografía y consistencia de nombres
+- [ ] Actualizar README del proyecto (explicar funcionamiento)
 - [ ] Siguiente versión:
+  - [ ] Sección de medidas (Globales / imperiales) 
   - [ ] Agregar gráficos (Semanales)
   - [ ] Agregar Base de datos
   - [ ] Agregar función de Sincronización (BD local con BD nube)
   - [ ] Agregar Otras medidas
+  - [ ] Agregar pantalla de Alertas y Notificaciones
+  - [ ] Evitar notificaciones duplicadas (cancelar alarmas previas antes de reprogramar)
+  - [ ] IOS
