@@ -57,6 +57,7 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 
 ### 🧩 Correcciones
 - [X] Agregar Readme
+- [ ] Corregir Navegación en Setup
 - [ ] Ajustar icono final de la app
 - [X] Mejorar SplashScreen
 - [X] Revisar notificaciones en Android 14
