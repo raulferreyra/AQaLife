@@ -56,8 +56,9 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 ## 📚 Roadmap (Siguiente Sprint)
 
 ### 🧩 Correcciones
+- [X] Agregar Readme
 - [ ] Ajustar icono final de la app
-- [ ] Mejorar SplashScreen
+- [X] Mejorar SplashScreen
 - [X] Revisar notificaciones en Android 14
 - [ ] Corregir notificaciones (mostrar tazas en vez de mL)
 - [ ] Agregar campo **Sexo**
