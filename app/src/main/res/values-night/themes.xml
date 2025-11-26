@@ -20,4 +20,11 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/iso_aqualife</item>
         <item name="postSplashScreenTheme">@style/Theme.AQuaLife</item>
     </style>
+
+    <style name="Theme.AQuaLife.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.AQuaLife.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 </resources>
