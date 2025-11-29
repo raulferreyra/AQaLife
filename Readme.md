@@ -72,6 +72,8 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 - [ ] Migración a base de datos local (Room DB)
 - [ ] Sincronización con servidor (BD en la nube)
 - [ ] Nuevas medidas corporales
+- [X] Login
+- [X] Firebase
 
 ---
 

@@ -21,3 +21,5 @@
   - [ ] Agregar pantalla de Alertas y Notificaciones
   - [ ] Evitar notificaciones duplicadas (cancelar alarmas previas antes de reprogramar)
   - [ ] IOS
+  - [X] Login
+  - [X] Firebase
