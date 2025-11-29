@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "130043650654",
+    "project_id": "aqualife-9365b",
+    "storage_bucket": "aqualife-9365b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130043650654:android:b5887c2088e2505fe3cacf",
+        "android_client_info": {
+          "package_name": "com.urasweb.aqualife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMGf9PA92gMsLw9nU1BJ0gwFL5g8PoSfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
