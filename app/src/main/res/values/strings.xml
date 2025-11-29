@@ -8,11 +8,13 @@
     <string name="action_settings">Settings</string>
 
     <!-- Menu -->
+    <string name="menu_login">Inicio de Sesión</string>
     <string name="menu_home">Dashboard</string>
     <string name="menu_personal_info">Información personal</string>
+    <!-- Login Fragment -->
+    <string name="login_txt_titulo">Inicio de Sesión</string>
     <!-- Home Fragment -->
     <string name="home_txt_titulo">Dashboard</string>
-    <string name="home_txt_resumen">Aquí se mostrará tu información</string>
     <!-- Settings Fragment -->
     <string name="settings_txt_titulo">Bienvenido, ingresa tus datos</string>
     <string name="settings_txt_talla">Talla (cm)</string>
