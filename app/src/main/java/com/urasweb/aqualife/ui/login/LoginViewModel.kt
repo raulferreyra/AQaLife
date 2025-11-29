@@ -1,33 +1,19 @@
 package com.urasweb.aqualife.ui.login
 
+import android.util.Patterns
+import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.util.Patterns
-import com.urasweb.aqualife.data.LoginRepository
-import com.urasweb.aqualife.data.Result
-
 import com.urasweb.aqualife.R
 
-class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
+class LoginViewModel : ViewModel() {
 
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> = _loginForm
 
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
-
-    fun login(username: String, password: String) {
-        // can be launched in a separate asynchronous job
-        val result = loginRepository.login(username, password)
-
-        if (result is Result.Success) {
-            _loginResult.value =
-                LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-        } else {
-            _loginResult.value = LoginResult(error = R.string.login_failed)
-        }
-    }
 
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {
@@ -39,7 +25,16 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
-    // A placeholder username validation check
+    fun onLoginSuccess(displayName: String) {
+        _loginResult.value = LoginResult(
+            success = LoggedInUserView(displayName = displayName)
+        )
+    }
+
+    fun onLoginError(@StringRes error: Int = R.string.login_failed) {
+        _loginResult.value = LoginResult(error = error)
+    }
+
     private fun isUserNameValid(username: String): Boolean {
         return if (username.contains("@")) {
             Patterns.EMAIL_ADDRESS.matcher(username).matches()
@@ -48,7 +43,6 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
-    // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }
