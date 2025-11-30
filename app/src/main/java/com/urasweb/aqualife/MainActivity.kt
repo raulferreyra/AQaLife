@@ -38,10 +38,25 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_personal_info
+                R.id.nav_login,
+                R.id.nav_setup,
+                R.id.nav_home,
+                R.id.nav_personal_info
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.nav_login || destination.id == R.id.nav_setup) {
+                // Ocultar la barra y bloquea el menú lateral
+                supportActionBar?.hide()
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            } else {
+                // Mostrar la barra y habilitar el menú cuando ya estás dentro (͡° ͜ʖ ͡°)
+                supportActionBar?.show()
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            }
+        }
+
         navView.setupWithNavController(navController)
     }
 
