@@ -1,158 +1,145 @@
 package com.urasweb.aqualife.ui.login
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.annotation.StringRes
-import androidx.fragment.app.Fragment
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.urasweb.aqualife.databinding.FragmentLoginBinding
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.urasweb.aqualife.R
 
 class LoginFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
-    private var _binding: FragmentLoginBinding? = null
-    private val binding get() = _binding!!
-
+    // Firebase
     private lateinit var auth: FirebaseAuth
+    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+
+    // Views
+    private lateinit var emailEditText: EditText
+    private lateinit var passwordEditText: EditText
+    private lateinit var loginButton: Button
+    private lateinit var loadingProgressBar: ProgressBar
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
+        // OJO: estos IDs deben existir en fragment_login.xml.
+        // Si tus campos se llaman distinto, cambia SOLO estas líneas.
+        emailEditText = view.findViewById(R.id.username)          // EditText de Email
+        passwordEditText = view.findViewById(R.id.password)       // EditText de Password
+        loginButton = view.findViewById(R.id.login)               // Botón SIGN IN OR REGISTER
+        loadingProgressBar = view.findViewById(R.id.loading)      // ProgressBar
 
-        // Firebase Auth
-        auth = FirebaseAuth.getInstance()
-
-        val usernameEditText = binding.username
-        val passwordEditText = binding.password
-        val loginButton = binding.login
-        val loadingProgressBar = binding.loading
-
-        // Observa estado del formulario (validaciones)
-        loginViewModel.loginFormState.observe(
-            viewLifecycleOwner,
-            Observer { loginFormState ->
-                loginFormState ?: return@Observer
-                loginButton.isEnabled = loginFormState.isDataValid
-                loginFormState.usernameError?.let {
-                    usernameEditText.error = getString(it)
-                }
-                loginFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
-                }
-            }
-        )
-
-        // Observa resultado del login (éxito / error)
-        loginViewModel.loginResult.observe(
-            viewLifecycleOwner,
-            Observer { loginResult ->
-                loginResult ?: return@Observer
-                loadingProgressBar.visibility = View.GONE
-                loginResult.error?.let {
-                    showLoginFailed(it)
-                }
-                loginResult.success?.let {
-                    updateUiWithUser(it)
-                    // Aquí luego navegaremos al HomeFragment
-                }
-            }
-        )
-
-        // Valida mientras el usuario escribe
-        val afterTextChangedListener = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable) {
-                loginViewModel.loginDataChanged(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
-                )
-            }
-        }
-        usernameEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.addTextChangedListener(afterTextChangedListener)
-
-        // Tecla "done" del teclado
+        // Acción "done" del teclado
         passwordEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE && loginButton.isEnabled) {
-                loginWithFirebase(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString(),
-                    loadingProgressBar
-                )
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                intentarLogin()
+                true
+            } else {
+                false
             }
-            false
         }
 
-        // Clic en el botón
+        // Click en el botón
         loginButton.setOnClickListener {
-            if (loginButton.isEnabled) {
-                loginWithFirebase(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString(),
-                    loadingProgressBar
-                )
-            }
+            intentarLogin()
         }
     }
 
-    private fun loginWithFirebase(
-        email: String,
-        password: String,
-        loadingProgressBar: ProgressBar
-    ) {
+    private fun intentarLogin() {
+        val email = emailEditText.text.toString().trim()
+        val password = passwordEditText.text.toString()
+
+        if (email.isEmpty()) {
+            emailEditText.error = "Ingresa tu correo"
+            return
+        }
+        if (password.length < 6) {
+            passwordEditText.error = "La contraseña debe tener al menos 6 caracteres"
+            return
+        }
+
+        loginButton.isEnabled = false
         loadingProgressBar.visibility = View.VISIBLE
 
+        // 1. Intentar iniciar sesión
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
-                loadingProgressBar.visibility = View.GONE
-
                 if (task.isSuccessful) {
-                    val user = task.result?.user
-                    val displayName = user?.email ?: "Usuario"
-                    loginViewModel.onLoginSuccess(displayName)
+                    onLoginSuccess()
                 } else {
-                    // Por ahora usamos un mensaje genérico
-                    loginViewModel.onLoginError()
+                    // 2. Si el usuario no existe, lo creamos
+                    if (task.exception is FirebaseAuthInvalidUserException) {
+                        crearUsuarioEnFirebase(email, password)
+                    } else {
+                        mostrarError(task.exception?.message ?: "Error al iniciar sesión")
+                    }
                 }
             }
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome) + " " + model.displayName
-        val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
+    private fun crearUsuarioEnFirebase(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val uid = auth.currentUser?.uid
+                    if (uid != null) {
+                        val data = hashMapOf(
+                            "email" to email,
+                            "createdAt" to FieldValue.serverTimestamp()
+                        )
+                        db.collection("users").document(uid).set(data)
+                            .addOnSuccessListener {
+                                onLoginSuccess()
+                            }
+                            .addOnFailureListener { e ->
+                                mostrarError("Usuario creado, pero fallo al guardar datos: ${e.message}")
+                            }
+                    } else {
+                        mostrarError("No se pudo obtener el usuario creado")
+                    }
+                } else {
+                    mostrarError(task.exception?.message ?: "Error al registrar usuario")
+                }
+            }
     }
 
-    private fun showLoginFailed(@StringRes errorString: Int) {
-        val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+    private fun onLoginSuccess() {
+        loadingProgressBar.visibility = View.GONE
+        loginButton.isEnabled = true
+
+        Toast.makeText(requireContext(), "Sesión iniciada correctamente", Toast.LENGTH_SHORT).show()
+
+        // Por ahora te llevo directo al Dashboard.
+        // Cambia nav_home por nav_setup si quieres forzar completar datos primero.
+        findNavController().navigate(R.id.nav_home)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun mostrarError(mensaje: String) {
+        loadingProgressBar.visibility = View.GONE
+        loginButton.isEnabled = true
+        Toast.makeText(requireContext(), mensaje, Toast.LENGTH_LONG).show()
     }
 }
