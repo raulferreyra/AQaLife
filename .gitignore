@@ -63,3 +63,6 @@ yarn-error.log
 # Kotlin / Java
 # ===============================
 out/
+
+# Firebase
+app/google-services.json
