@@ -4,6 +4,7 @@ import com.urasweb.aqualife.data.local.AquaDatabase
 import com.urasweb.aqualife.data.local.ImcRecordEntity
 import com.urasweb.aqualife.data.local.SyncStatus
 import java.util.UUID
+import kotlin.math.round
 
 object AquaRepository {
 
@@ -18,6 +19,9 @@ object AquaRepository {
         currentUserId = uid
     }
 
+    /**
+     * Guardar un registro IMC genérico (se puede usar desde cualquier parte).
+     */
     suspend fun saveImc(
         pesoKg: Double,
         tallaM: Double,
@@ -43,7 +47,41 @@ object AquaRepository {
         db.imcDao().insert(record)
     }
 
+    /**
+     * Usado específicamente en el Setup:
+     * recibe altura en cm y peso en kg, calcula IMC y lo guarda.
+     */
+    suspend fun saveInitialSetupImc(
+        alturaCm: Float,
+        pesoKg: Float,
+        perimetroAbdominalCm: Double? = null
+    ) {
+        val alturaM = alturaCm / 100.0
+        val peso = pesoKg.toDouble()
+
+        val imc = peso / (alturaM * alturaM)
+        val imcRedondeado = (round(imc * 100.0) / 100.0)
+        val clasificacion = clasificarImc(imcRedondeado)
+
+        saveImc(
+            pesoKg = peso,
+            tallaM = alturaM,
+            perimetroAbdominalCm = perimetroAbdominalCm ?: 0.0,
+            imc = imcRedondeado,
+            clasificacionImc = clasificacion
+        )
+    }
+
     suspend fun getDirtyImc(): List<ImcRecordEntity> {
         return db.imcDao().getRecordsByStatus(SyncStatus.DIRTY)
+    }
+
+    private fun clasificarImc(imc: Double): String {
+        return when {
+            imc < 18.5 -> "Bajo peso"
+            imc < 25.0 -> "Normal"
+            imc < 30.0 -> "Sobrepeso"
+            else -> "Obesidad"
+        }
     }
 }
