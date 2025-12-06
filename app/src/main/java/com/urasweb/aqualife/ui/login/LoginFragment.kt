@@ -67,20 +67,13 @@ class LoginFragment : Fragment() {
             }
         }
 
-        loginViewModel.loginResult.observe(viewLifecycleOwner) { loginResult ->
-            loginResult ?: return@observe
-
-            loadingProgressBar.visibility = View.GONE
-
-            loginResult.error?.let { errorRes ->
-                showLoginFailed(errorRes)
-            }
-
-            loginResult.success?.let { loggedInUserView ->
-                updateUiWithUser(loggedInUserView)
-                findNavController().navigate(R.id.nav_setup)
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
+            if (result.success != null) {
+                updateUiWithUser(result.success)
+                findNavController().navigate(R.id.nav_home)
             }
         }
+
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(
