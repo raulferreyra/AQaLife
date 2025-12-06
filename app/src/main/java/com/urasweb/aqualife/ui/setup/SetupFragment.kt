@@ -11,10 +11,13 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.urasweb.aqualife.R
+import com.urasweb.aqualife.data.repository.AquaRepository
+import kotlinx.coroutines.launch
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -109,52 +112,63 @@ class SetupFragment : Fragment() {
     }
 
     private fun guardarDatosYVolverAlDashboard() {
-        // Limpiar errores previos
+        // Limpia errores previos
         layoutAltura.error = null
         layoutPeso.error = null
         layoutFechaNac.error = null
-
-        var hayError = false
-        var primerCampoConError: View? = null
 
         val alturaStr = inputAltura.text?.toString()?.trim()
         val pesoStr = inputPeso.text?.toString()?.trim()
         val fechaStr = inputFechaNac.text?.toString()?.trim()
 
+        var alturaCm: Float? = null
+        var pesoKg: Float? = null
+        var fechaNacDate: Date? = null
+
+        var hayError = false
+        var primerCampoConError: View? = null
+
         // ------ Validar ALTURA ------
-        val alturaCm = alturaStr?.toFloatOrNull()
         if (alturaStr.isNullOrEmpty()) {
-            layoutAltura.error = "Ingresa tu talla en centímetros"
+            layoutAltura.error = "Ingresa tu altura"
             hayError = true
             primerCampoConError = primerCampoConError ?: inputAltura
-        } else if (alturaCm == null) {
-            layoutAltura.error = "La talla debe ser un número válido"
-            hayError = true
-            primerCampoConError = primerCampoConError ?: inputAltura
-        } else if (alturaCm !in ALTURA_MIN..ALTURA_MAX) {
-            layoutAltura.error = "La talla debe estar entre $ALTURA_MIN y $ALTURA_MAX cm"
-            hayError = true
-            primerCampoConError = primerCampoConError ?: inputAltura
+        } else {
+            try {
+                alturaCm = alturaStr.replace(",", ".").toFloat()
+                if (alturaCm !in ALTURA_MIN..ALTURA_MAX) {
+                    layoutAltura.error = "La altura debe estar entre $ALTURA_MIN y $ALTURA_MAX cm"
+                    hayError = true
+                    primerCampoConError = primerCampoConError ?: inputAltura
+                }
+            } catch (e: NumberFormatException) {
+                layoutAltura.error = "La altura debe ser un número válido"
+                hayError = true
+                primerCampoConError = primerCampoConError ?: inputAltura
+            }
         }
 
         // ------ Validar PESO ------
-        val pesoKg = pesoStr?.toFloatOrNull()
         if (pesoStr.isNullOrEmpty()) {
-            layoutPeso.error = "Ingresa tu peso en kilogramos"
+            layoutPeso.error = "Ingresa tu peso"
             hayError = true
             primerCampoConError = primerCampoConError ?: inputPeso
-        } else if (pesoKg == null) {
-            layoutPeso.error = "El peso debe ser un número válido"
-            hayError = true
-            primerCampoConError = primerCampoConError ?: inputPeso
-        } else if (pesoKg !in PESO_MIN..PESO_MAX) {
-            layoutPeso.error = "El peso debe estar entre $PESO_MIN y $PESO_MAX kg"
-            hayError = true
-            primerCampoConError = primerCampoConError ?: inputPeso
+        } else {
+            try {
+                pesoKg = pesoStr.replace(",", ".").toFloat()
+                if (pesoKg !in PESO_MIN..PESO_MAX) {
+                    layoutPeso.error = "El peso debe estar entre $PESO_MIN y $PESO_MAX kg"
+                    hayError = true
+                    primerCampoConError = primerCampoConError ?: inputPeso
+                }
+            } catch (e: NumberFormatException) {
+                layoutPeso.error = "El peso debe ser un número válido"
+                hayError = true
+                primerCampoConError = primerCampoConError ?: inputPeso
+            }
         }
 
         // ------ Validar FECHA ------
-        var fechaNacDate: Date? = null
         if (fechaStr.isNullOrEmpty()) {
             layoutFechaNac.error = "Ingresa tu fecha de nacimiento"
             hayError = true
@@ -170,13 +184,12 @@ class SetupFragment : Fragment() {
                     layoutFechaNac.error = "Fecha inválida"
                     hayError = true
                     primerCampoConError = primerCampoConError ?: inputFechaNac
-                } else if (fechaNacDate.after(hoy)) {
+                } else if (fechaNacDate!!.after(hoy)) {
                     layoutFechaNac.error = "La fecha no puede ser mayor a hoy"
                     hayError = true
                     primerCampoConError = primerCampoConError ?: inputFechaNac
                 } else {
-                    // Validar rango de edad (opcional: 5 a 120 años)
-                    val edad = calcularEdad(fechaNacDate, hoy)
+                    val edad = calcularEdad(fechaNacDate!!, hoy)
                     if (edad !in EDAD_MIN..EDAD_MAX) {
                         layoutFechaNac.error =
                             "La edad debe estar entre $EDAD_MIN y $EDAD_MAX años"
@@ -210,29 +223,42 @@ class SetupFragment : Fragment() {
             return
         }
 
-        // Si llegamos aquí, los datos son válidos
+        // Datos válidos
         val alturaRedondeada = redondear2Dec(alturaCm!!)
         val pesoRedondeado = redondear2Dec(pesoKg!!)
-
         val sexo = when (rgSexo.checkedRadioButtonId) {
             rbMasculino.id -> "M"
             rbFemenino.id -> "F"
-            else -> "U" // Por si acaso
+            else -> "U"
         }
+        val fechaMillis = fechaNacDate!!.time
 
+        // 1) Persistencia rápida local para que el usuario no pierda datos
         val prefs = requireContext().getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
         prefs.edit()
             .putFloat("altura_cm", alturaRedondeada)
             .putFloat("peso_kg", pesoRedondeado)
             .putString("fecha_nac", fechaStr)
             .putString("sexo", sexo)
+            .putBoolean("setup_completed", true)
             .apply()
 
-        Toast.makeText(requireContext(), "Datos guardados correctamente", Toast.LENGTH_SHORT)
-            .show()
-
-        // Volver al Dashboard (HomeFragment)
-        findNavController().navigateUp()
+        // 2) Guardar en base local (Room) y marcar para sincronizar
+        val appContext = requireContext().applicationContext
+        lifecycleScope.launch {
+            try {
+                AquaRepository.saveInitialSetupImc(
+                    alturaCm = alturaCm,
+                    pesoKg = pesoKg,
+                    perimetroAbdominalCm = 0.0  // o null si aún no lo pides
+                )
+                // Aquí navegas al Dashboard
+                findNavController().navigate(R.id.nav_home)
+            } catch (e: IllegalStateException) {
+                // Esto pasa si no se llamó a setCurrentUser(uid) previamente
+                Toast.makeText(requireContext(), "Error: usuario no inicializado", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun redondear2Dec(valor: Float): Float {
@@ -244,22 +270,19 @@ class SetupFragment : Fragment() {
         val calHoy = Calendar.getInstance().apply { time = hoy }
 
         var edad = calHoy.get(Calendar.YEAR) - calNac.get(Calendar.YEAR)
-
-        // Ajuste si aún no cumplió años este año
         if (calHoy.get(Calendar.DAY_OF_YEAR) < calNac.get(Calendar.DAY_OF_YEAR)) {
             edad--
         }
         return edad
     }
 
-    companion object {
-        // Rangos que puedes ajustar a tu gusto
-        private const val ALTURA_MIN = 100f  // cm
-        private const val ALTURA_MAX = 250f  // cm
-        private const val PESO_MIN = 30f     // kg
-        private const val PESO_MAX = 250f    // kg
 
-        private const val EDAD_MIN = 5       // años
-        private const val EDAD_MAX = 120     // años
+    companion object {
+        private const val ALTURA_MIN = 100f
+        private const val ALTURA_MAX = 250f
+        private const val PESO_MIN = 30f
+        private const val PESO_MAX = 250f
+        private const val EDAD_MIN = 5
+        private const val EDAD_MAX = 120
     }
 }
