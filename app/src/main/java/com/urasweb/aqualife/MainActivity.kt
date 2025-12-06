@@ -14,7 +14,10 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.urasweb.aqualife.databinding.ActivityMainBinding
+import com.urasweb.aqualife.data.local.AquaDatabase
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.urasweb.aqualife.data.repository.AquaRepository
+import com.urasweb.aqualife.sync.SyncManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +28,11 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
+
+        AquaDatabase.init(this)
+        AquaRepository.init(AquaDatabase.getInstance())
+
+        SyncManager.init(applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
