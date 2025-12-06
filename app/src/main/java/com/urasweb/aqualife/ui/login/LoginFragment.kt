@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.urasweb.aqualife.R
+import com.urasweb.aqualife.data.repository.AquaRepository
 
 class LoginFragment : Fragment() {
 
@@ -53,19 +54,26 @@ class LoginFragment : Fragment() {
         loginButton = view.findViewById(R.id.login)
         loadingProgressBar = view.findViewById(R.id.loading)
 
-        loginViewModel.loginFormState.observe(viewLifecycleOwner) { loginFormState ->
-            if (loginFormState == null) return@observe
 
-            loginButton.isEnabled = loginFormState.isDataValid
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
+            if (result.success != null) {
 
-            loginFormState.usernameError?.let { errorRes ->
-                emailEditText.error = getString(errorRes)
-            }
+                // Obtener UID del usuario autenticado
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
 
-            loginFormState.passwordError?.let { errorRes ->
-                passwordEditText.error = getString(errorRes)
+                if (uid != null) {
+                    // Registrar el UID en el repositorio
+                    AquaRepository.setCurrentUser(uid)
+                }
+
+                // Actualizar UI
+                updateUiWithUser(result.success)
+
+                // Navegar a Setup o Dashboard
+                findNavController().navigate(R.id.nav_home)
             }
         }
+
 
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
             if (result.success != null) {
