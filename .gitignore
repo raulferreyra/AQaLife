@@ -66,3 +66,8 @@ out/
 
 # Firebase
 app/google-services.json
+
+# Room / SQLite databases
+*.db
+*.db-shm
+*.db-wal
