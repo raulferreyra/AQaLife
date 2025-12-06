@@ -57,7 +57,7 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 
 ### 🧩 Correcciones
 - [X] Agregar Readme
-- [ ] Corregir Navegación en Setup
+- [X] Corregir Navegación en Setup
 - [ ] Ajustar icono final de la app
 - [X] Mejorar SplashScreen
 - [X] Revisar notificaciones en Android 14
@@ -69,8 +69,8 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 
 ### 🌟 Nuevas funciones (Sprint 2)
 - [ ] Gráficos semanales de IMC e hidratación
-- [ ] Migración a base de datos local (Room DB)
-- [ ] Sincronización con servidor (BD en la nube)
+- [X] Migración a base de datos local (Room DB)
+- [X] Sincronización con servidor (BD en la nube)
 - [ ] Nuevas medidas corporales
 - [X] Login
 - [X] Firebase

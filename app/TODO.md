@@ -15,8 +15,8 @@
 - [ ] Siguiente versión:
   - [ ] Sección de medidas (Globales / imperiales) 
   - [ ] Agregar gráficos (Semanales)
-  - [ ] Agregar Base de datos
-  - [ ] Agregar función de Sincronización (BD local con BD nube)
+  - [X] Agregar Base de datos
+  - [X] Agregar función de Sincronización (BD local con BD nube)
   - [ ] Agregar Otras medidas
   - [ ] Agregar pantalla de Alertas y Notificaciones
   - [ ] Evitar notificaciones duplicadas (cancelar alarmas previas antes de reprogramar)
