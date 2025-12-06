@@ -46,16 +46,22 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.nav_login || destination.id == R.id.nav_setup) {
-                // Ocultar la barra y bloquea el menú lateral
-                supportActionBar?.hide()
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-            } else {
-                // Mostrar la barra y habilitar el menú cuando ya estás dentro (͡° ͜ʖ ͡°)
+            val showBar = destination.id != R.id.nav_setup
+
+            if (showBar) {
                 supportActionBar?.show()
                 drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            } else {
+                supportActionBar?.show()
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
+
+            val shouldShowBack =
+                destination.id != R.id.nav_login && destination.id != R.id.nav_setup
+
+            supportActionBar?.setDisplayHomeAsUpEnabled(shouldShowBack)
         }
+
 
         navView.setupWithNavController(navController)
     }
