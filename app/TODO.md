@@ -1,5 +1,5 @@
 - [X] Agregar Readme
-- [ ] Corregir Navegación en Setup
+- [X] Corregir Navegación en Setup
 - [ ] Ajustar icono de la app
 - [X] Ajustar screensplash
 - [X] Revisar notificaciones en Android 14
