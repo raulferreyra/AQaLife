@@ -14,10 +14,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.urasweb.aqualife.R
 
 class LoginFragment : Fragment() {
@@ -25,8 +24,8 @@ class LoginFragment : Fragment() {
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var auth: FirebaseAuth
 
-    private lateinit var emailEditText: TextInputEditText
-    private lateinit var passwordEditText: TextInputEditText
+    private lateinit var emailEditText: EditText
+    private lateinit var passwordEditText: EditText
     private lateinit var loginButton: Button
     private lateinit var loadingProgressBar: ProgressBar
 
@@ -41,22 +40,18 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ViewModel
         loginViewModel = ViewModelProvider(
             this,
             LoginViewModelFactory()
         )[LoginViewModel::class.java]
 
-        // Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // Referencias a vistas (ajusta los IDs si en tu XML son distintos)
         emailEditText = view.findViewById(R.id.username)
         passwordEditText = view.findViewById(R.id.password)
         loginButton = view.findViewById(R.id.login)
         loadingProgressBar = view.findViewById(R.id.loading)
 
-        // Observa el estado del formulario (habilita/deshabilita botón, muestra errores)
         loginViewModel.loginFormState.observe(viewLifecycleOwner) { loginFormState ->
             if (loginFormState == null) return@observe
 
@@ -71,7 +66,6 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // Observa el resultado del login
         loginViewModel.loginResult.observe(viewLifecycleOwner) { loginResult ->
             loginResult ?: return@observe
 
@@ -83,16 +77,24 @@ class LoginFragment : Fragment() {
 
             loginResult.success?.let { loggedInUserView ->
                 updateUiWithUser(loggedInUserView)
-
-                // Después del login OK => ir a Setup primero
                 findNavController().navigate(R.id.nav_setup)
             }
         }
 
-        // TextWatcher para validar mientras se escribe
         val afterTextChangedListener = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) = Unit
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) = Unit
 
             override fun afterTextChanged(s: Editable?) {
                 loginViewModel.loginDataChanged(
@@ -105,7 +107,6 @@ class LoginFragment : Fragment() {
         emailEditText.addTextChangedListener(afterTextChangedListener)
         passwordEditText.addTextChangedListener(afterTextChangedListener)
 
-        // Tecla "Done" del teclado en el campo password
         passwordEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE && loginButton.isEnabled) {
                 val email = emailEditText.text?.toString()?.trim() ?: ""
@@ -117,7 +118,6 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // Click en el botón
         loginButton.setOnClickListener {
             val email = emailEditText.text?.toString()?.trim() ?: ""
             val password = passwordEditText.text?.toString() ?: ""
@@ -127,11 +127,7 @@ class LoginFragment : Fragment() {
         }
     }
 
-    /**
-     * Login con Firebase. Si el usuario no existe, lo crea.
-     */
     private fun loginWithFirebase(email: String, password: String) {
-        // Primero intentamos login
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -140,7 +136,6 @@ class LoginFragment : Fragment() {
                 } else {
                     val exception = task.exception
 
-                    // Si el usuario no existe, intentamos registrarlo
                     if (exception is FirebaseAuthInvalidUserException) {
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { createTask ->
