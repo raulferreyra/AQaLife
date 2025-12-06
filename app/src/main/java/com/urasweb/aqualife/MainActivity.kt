@@ -29,9 +29,14 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // Inicializar Room
         AquaDatabase.init(this)
-        AquaRepository.init(AquaDatabase.getInstance())
+        val db = AquaDatabase.getInstance()
 
+        // Inicializar Repository
+        AquaRepository.init(db)
+
+        // Inicializar SyncManager (para WorkManager)
         SyncManager.init(applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
