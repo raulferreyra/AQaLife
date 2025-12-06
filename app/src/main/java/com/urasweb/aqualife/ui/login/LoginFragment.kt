@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.urasweb.aqualife.R
 
 class LoginFragment : Fragment() {
@@ -128,23 +129,24 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginWithFirebase(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { createTask ->
+                if (createTask.isSuccessful) {
                     val userEmail = auth.currentUser?.email ?: email
                     loginViewModel.onLoginSuccess(userEmail)
                 } else {
-                    val exception = task.exception
+                    val exception = createTask.exception
 
-                    if (exception is FirebaseAuthInvalidUserException) {
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { createTask ->
-                                if (createTask.isSuccessful) {
+                    // Email already registered -> try login
+                    if (exception is FirebaseAuthUserCollisionException) {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { signInTask ->
+                                if (signInTask.isSuccessful) {
                                     val userEmail = auth.currentUser?.email ?: email
                                     loginViewModel.onLoginSuccess(userEmail)
                                 } else {
                                     loginViewModel.onLoginError()
-                                    showFirebaseError(createTask.exception)
+                                    showFirebaseError(signInTask.exception)
                                 }
                             }
                     } else {
@@ -155,14 +157,22 @@ class LoginFragment : Fragment() {
             }
     }
 
+
     private fun showFirebaseError(exception: Exception?) {
         val msg = when (exception) {
-            is FirebaseAuthInvalidCredentialsException -> "Correo o contraseña inválidos."
-            is FirebaseAuthInvalidUserException -> "Usuario no encontrado."
-            else -> exception?.localizedMessage ?: "Error de autenticación."
+            is FirebaseAuthInvalidCredentialsException ->
+                "Credenciales inválidas. Verificar correo y contraseña."
+            is FirebaseAuthInvalidUserException ->
+                "Usuario no encontrado."
+            else -> {
+                val type = exception?.javaClass?.simpleName ?: "Unknown"
+                val detail = exception?.localizedMessage ?: "Authentication error."
+                "$type: $detail"
+            }
         }
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
+
 
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome) + " " + model.displayName
