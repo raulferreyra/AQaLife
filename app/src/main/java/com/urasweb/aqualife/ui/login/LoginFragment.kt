@@ -1,5 +1,6 @@
 package com.urasweb.aqualife.ui.login
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -49,6 +50,28 @@ class LoginFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
 
+        // ─────────────────────────────────────────────
+        // AUTO-LOGIN: si ya hay usuario, saltar Login
+        // ─────────────────────────────────────────────
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            AquaRepository.setCurrentUser(currentUser.uid)
+
+            val prefs = requireContext()
+                .getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
+            val setupCompleted = prefs.getBoolean("setup_completed", false)
+
+            if (setupCompleted) {
+                // Ya hizo Setup → ir al Dashboard/Home
+                findNavController().navigate(R.id.nav_home)
+            } else {
+                // Tiene sesión, pero falta Setup
+                findNavController().navigate(R.id.nav_setup)
+            }
+            return
+        }
+        // ─────────────────────────────────────────────
+
         emailEditText = view.findViewById(R.id.username)
         passwordEditText = view.findViewById(R.id.password)
         loginButton = view.findViewById(R.id.login)
@@ -86,6 +109,7 @@ class LoginFragment : Fragment() {
                 }
 
                 updateUiWithUser(userView)
+                // Primera vez: siempre vamos a Setup
                 findNavController().navigate(R.id.nav_setup)
             }
         }

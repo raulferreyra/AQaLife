@@ -24,11 +24,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * A simple [androidx.fragment.app.Fragment] subclass.
- * Use the [SetupFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SetupFragment : Fragment() {
 
     // Inputs
@@ -77,6 +72,33 @@ class SetupFragment : Fragment() {
         // Botón
         btnGuardar = view.findViewById(R.id.btnGuardar)
 
+        // ─────────────────────────────────────────────
+        // PRECARGAR DATOS SI YA EXISTEN EN PREFERENCIAS
+        // ─────────────────────────────────────────────
+        val prefs = requireContext()
+            .getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
+
+        val alturaGuardada = prefs.getFloat("altura_cm", 0f)
+        if (alturaGuardada > 0f) {
+            inputAltura.setText(alturaGuardada.toString())
+        }
+
+        val pesoGuardado = prefs.getFloat("peso_kg", 0f)
+        if (pesoGuardado > 0f) {
+            inputPeso.setText(pesoGuardado.toString())
+        }
+
+        val fechaGuardada = prefs.getString("fecha_nac", null)
+        if (!fechaGuardada.isNullOrEmpty()) {
+            inputFechaNac.setText(fechaGuardada)
+        }
+
+        when (prefs.getString("sexo", null)) {
+            "M" -> rbMasculino.isChecked = true
+            "F" -> rbFemenino.isChecked = true
+        }
+        // ─────────────────────────────────────────────
+
         // DatePicker para la fecha
         inputFechaNac.setOnClickListener {
             mostrarDatePicker()
@@ -96,7 +118,6 @@ class SetupFragment : Fragment() {
         val dialog = DatePickerDialog(
             requireContext(),
             { _, y, m, d ->
-                // dd/MM/yyyy
                 val texto = String.format(Locale.getDefault(), "%02d/%02d/%04d", d, m + 1, y)
                 inputFechaNac.setText(texto)
             },
@@ -104,10 +125,7 @@ class SetupFragment : Fragment() {
             month,
             day
         )
-
-        // Opcional: limitar fechas (ej. desde 1900 hasta hoy)
         dialog.datePicker.maxDate = hoy.timeInMillis
-
         dialog.show()
     }
 
@@ -233,7 +251,7 @@ class SetupFragment : Fragment() {
         }
         val fechaMillis = fechaNacDate!!.time
 
-        // 1) Persistencia rápida local para que el usuario no pierda datos
+        // 1) Guardar en SharedPreferences (incluye bandera de Setup)
         val prefs = requireContext().getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
         prefs.edit()
             .putFloat("altura_cm", alturaRedondeada)
@@ -243,20 +261,29 @@ class SetupFragment : Fragment() {
             .putBoolean("setup_completed", true)
             .apply()
 
-        // 2) Guardar en base local (Room) y marcar para sincronizar
-        val appContext = requireContext().applicationContext
+        // 2) Guardar registro IMC inicial en Room y marcar para sync
         lifecycleScope.launch {
             try {
                 AquaRepository.saveInitialSetupImc(
-                    alturaCm = alturaCm,
-                    pesoKg = pesoKg,
-                    perimetroAbdominalCm = 0.0  // o null si aún no lo pides
+                    alturaCm = alturaRedondeada,
+                    pesoKg = pesoRedondeado,
+                    perimetroAbdominalCm = 0.0
                 )
-                // Aquí navegas al Dashboard
+
+                Toast.makeText(
+                    requireContext(),
+                    "Datos guardados correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Ir al Dashboard/Home
                 findNavController().navigate(R.id.nav_home)
             } catch (e: IllegalStateException) {
-                // Esto pasa si no se llamó a setCurrentUser(uid) previamente
-                Toast.makeText(requireContext(), "Error: usuario no inicializado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error: usuario no inicializado",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -275,7 +302,6 @@ class SetupFragment : Fragment() {
         }
         return edad
     }
-
 
     companion object {
         private const val ALTURA_MIN = 100f
