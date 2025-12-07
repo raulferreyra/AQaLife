@@ -54,34 +54,41 @@ class LoginFragment : Fragment() {
         loginButton = view.findViewById(R.id.login)
         loadingProgressBar = view.findViewById(R.id.loading)
 
+        // Habilitar / deshabilitar botón según validación
+        loginViewModel.loginFormState.observe(viewLifecycleOwner) { state ->
+            state ?: return@observe
 
+            loginButton.isEnabled = state.isDataValid
+
+            state.usernameError?.let { errorRes ->
+                emailEditText.error = getString(errorRes)
+            }
+
+            state.passwordError?.let { errorRes ->
+                passwordEditText.error = getString(errorRes)
+            }
+        }
+
+        // Resultado de login
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
-            if (result.success != null) {
+            result ?: return@observe
 
-                // Obtener UID del usuario autenticado
+            loadingProgressBar.visibility = View.GONE
+
+            result.error?.let { errorRes ->
+                showLoginFailed(errorRes)
+            }
+
+            result.success?.let { userView ->
                 val uid = FirebaseAuth.getInstance().currentUser?.uid
-
                 if (uid != null) {
-                    // Registrar el UID en el repositorio
                     AquaRepository.setCurrentUser(uid)
                 }
 
-                // Actualizar UI
-                updateUiWithUser(result.success)
-
-                // Navegar a Setup o Dashboard
-                findNavController().navigate(R.id.nav_home)
+                updateUiWithUser(userView)
+                findNavController().navigate(R.id.nav_setup)
             }
         }
-
-
-        loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
-            if (result.success != null) {
-                updateUiWithUser(result.success)
-                findNavController().navigate(R.id.nav_home)
-            }
-        }
-
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(
@@ -113,6 +120,7 @@ class LoginFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE && loginButton.isEnabled) {
                 val email = emailEditText.text?.toString()?.trim() ?: ""
                 val password = passwordEditText.text?.toString() ?: ""
+                loadingProgressBar.visibility = View.VISIBLE
                 loginWithFirebase(email, password)
                 true
             } else {
@@ -130,6 +138,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginWithFirebase(email: String, password: String) {
+        // Crear usuario; si ya existe, intentar login
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { createTask ->
                 if (createTask.isSuccessful) {
@@ -138,7 +147,6 @@ class LoginFragment : Fragment() {
                 } else {
                     val exception = createTask.exception
 
-                    // Email already registered -> try login
                     if (exception is FirebaseAuthUserCollisionException) {
                         auth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { signInTask ->
@@ -158,7 +166,6 @@ class LoginFragment : Fragment() {
             }
     }
 
-
     private fun showFirebaseError(exception: Exception?) {
         val msg = when (exception) {
             is FirebaseAuthInvalidCredentialsException ->
@@ -173,7 +180,6 @@ class LoginFragment : Fragment() {
         }
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
-
 
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome) + " " + model.displayName
