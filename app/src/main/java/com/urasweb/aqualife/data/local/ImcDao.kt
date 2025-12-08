@@ -16,4 +16,7 @@ interface ImcDao {
 
     @Query("UPDATE imc_history SET syncStatus = :newStatus WHERE id = :recordId")
     suspend fun updateSyncStatus(recordId: String, newStatus: SyncStatus)
+
+    @Query("SELECT * FROM imc_history WHERE id = :recordId LIMIT 1")
+    suspend fun getById(recordId: String): ImcRecordEntity?
 }
