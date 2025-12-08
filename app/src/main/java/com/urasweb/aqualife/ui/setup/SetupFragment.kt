@@ -15,8 +15,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
 import com.urasweb.aqualife.R
+import com.urasweb.aqualife.data.local.AquaDatabase
 import com.urasweb.aqualife.data.repository.AquaRepository
+import com.urasweb.aqualife.sync.SyncManager
 import kotlinx.coroutines.launch
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -155,7 +158,8 @@ class SetupFragment : Fragment() {
             try {
                 alturaCm = alturaStr.replace(",", ".").toFloat()
                 if (alturaCm !in ALTURA_MIN..ALTURA_MAX) {
-                    layoutAltura.error = "La altura debe estar entre $ALTURA_MIN y $ALTURA_MAX cm"
+                    layoutAltura.error =
+                        "La altura debe estar entre $ALTURA_MIN y $ALTURA_MAX cm"
                     hayError = true
                     primerCampoConError = primerCampoConError ?: inputAltura
                 }
@@ -265,11 +269,42 @@ class SetupFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
+                // ─────────────────────────────────────────────
+                // 2) Inicializar DB y Repositorio (idempotente)
+                // ─────────────────────────────────────────────
+                AquaDatabase.init(appContext)
+                val db = AquaDatabase.getInstance()
+                AquaRepository.init(db)
+
+                // ─────────────────────────────────────────────
+                // 3) Establecer usuario actual en el repositorio
+                // ─────────────────────────────────────────────
+                val auth = FirebaseAuth.getInstance()
+                val currentUser = auth.currentUser
+                if (currentUser == null) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error: usuario no autenticado en Firebase",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+                AquaRepository.setCurrentUser(currentUser.uid)
+
+                // ─────────────────────────────────────────────
+                // 4) Guardar IMC inicial en la BD local
+                // ─────────────────────────────────────────────
                 AquaRepository.saveInitialSetupImc(
-                    alturaCm = alturaCm!!,
+                    alturaCm = alturaCm,
                     pesoKg = pesoKg!!,
-                    perimetroAbdominalCm = 0.0   // o null si aún no lo manejamos
+                    perimetroAbdominalCm = 0.0   // por ahora no se captura
                 )
+
+                // ─────────────────────────────────────────────
+                // 5) Disparar sincronización inmediata con Firestore
+                //    (subirá imc_history usando el SyncWorker)
+                // ─────────────────────────────────────────────
+                SyncManager.triggerImmediateSync(appContext)
 
                 Toast.makeText(
                     requireContext(),
@@ -277,18 +312,23 @@ class SetupFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // Go to dashboard
+                // Ir al dashboard
                 findNavController().navigate(R.id.nav_home)
 
             } catch (e: IllegalStateException) {
                 Toast.makeText(
                     requireContext(),
-                    "Error: usuario no inicializado",
+                    "Error al inicializar datos locales: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Error inesperado al guardar tus datos",
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
-
     }
 
     private fun redondear2Dec(valor: Float): Float {
