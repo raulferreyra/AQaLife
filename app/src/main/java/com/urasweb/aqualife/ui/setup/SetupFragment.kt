@@ -261,13 +261,14 @@ class SetupFragment : Fragment() {
             .putBoolean("setup_completed", true)
             .apply()
 
-        // 2) Guardar registro IMC inicial en Room y marcar para sync
+        val appContext = requireContext().applicationContext
+
         lifecycleScope.launch {
             try {
                 AquaRepository.saveInitialSetupImc(
-                    alturaCm = alturaRedondeada,
-                    pesoKg = pesoRedondeado,
-                    perimetroAbdominalCm = 0.0
+                    alturaCm = alturaCm!!,
+                    pesoKg = pesoKg!!,
+                    perimetroAbdominalCm = 0.0   // o null si aún no lo manejamos
                 )
 
                 Toast.makeText(
@@ -276,8 +277,9 @@ class SetupFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // Ir al Dashboard/Home
+                // Go to dashboard
                 findNavController().navigate(R.id.nav_home)
+
             } catch (e: IllegalStateException) {
                 Toast.makeText(
                     requireContext(),
@@ -286,6 +288,7 @@ class SetupFragment : Fragment() {
                 ).show()
             }
         }
+
     }
 
     private fun redondear2Dec(valor: Float): Float {

@@ -1,6 +1,7 @@
 package com.urasweb.aqualife.sync
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.auth.FirebaseAuth
@@ -102,6 +103,9 @@ class SyncWorker(
             prefs.edit()
                 .putLong("imc_last_sync", now)
                 .apply()
+
+            val dirty = AquaRepository.getDirtyImc()
+            Log.d("SyncWorker", "Dirty IMC records = ${dirty.size}")
 
             return Result.success()
         } catch (e: Exception) {

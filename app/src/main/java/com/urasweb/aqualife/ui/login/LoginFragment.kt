@@ -102,16 +102,17 @@ class LoginFragment : Fragment() {
                 showLoginFailed(errorRes)
             }
 
-            result.success?.let { userView ->
-                val uid = FirebaseAuth.getInstance().currentUser?.uid
-                if (uid != null) {
-                    AquaRepository.setCurrentUser(uid)
+            if (result.success != null) {
+                // Set current user in repository
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                if (firebaseUser != null) {
+                    AquaRepository.setCurrentUser(firebaseUser.uid)
                 }
 
-                updateUiWithUser(userView)
-                // Primera vez: siempre vamos a Setup
+                // Continue navigation
                 findNavController().navigate(R.id.nav_setup)
             }
+
         }
 
         val afterTextChangedListener = object : TextWatcher {
