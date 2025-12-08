@@ -18,70 +18,90 @@
             android:textSize="20sp"
             android:paddingBottom="12dp" />
 
-        <!-- Peso -->
+        <!-- Nombre -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutNombre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Peso (kg)">
+            android:hint="Nombre">
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputPeso"
-                android:inputType="numberDecimal"
+                android:id="@+id/inputNombre"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Talla -->
+        <!-- Apellido -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutApellido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Talla (cm)"
+            android:hint="Apellido"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputAltura"
-                android:inputType="numberDecimal"
+                android:id="@+id/inputApellido"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Fecha de nacimiento -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Fecha de nacimiento (dd/mm/aaaa)"
-            android:layout_marginTop="8dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputFechaNac"
-                android:inputType="text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Perímetro abdominal -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Perímetro abdominal (cm)"
-            android:layout_marginTop="8dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputPerimetro"
-                android:inputType="numberDecimal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Frecuencia de notificaciones -->
+        <!-- Sexo -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recordatorio de notificaciones"
+            android:text="Sexo"
             android:layout_marginTop="12dp" />
 
-        <Spinner
-            android:id="@+id/spinnerFrecuencia"
+        <RadioGroup
+            android:id="@+id/rgSexo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        <!-- Botones -->
+            <RadioButton
+                android:id="@+id/rbMasculino"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Masculino" />
+
+            <RadioButton
+                android:id="@+id/rbFemenino"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Femenino"
+                android:layout_marginStart="16dp" />
+        </RadioGroup>
+
+        <!-- Fecha de nacimiento -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutFechaNac"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Fecha de nacimiento (dd/MM/aaaa)"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputFechaNac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Meta diaria de agua -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutMetaAgua"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Meta diaria de agua (ml)"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputMetaAgua"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:focusable="false" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Botón Guardar -->
         <Button
             android:id="@+id/btnGuardar"
             android:layout_width="match_parent"
