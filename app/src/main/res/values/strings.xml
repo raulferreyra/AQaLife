@@ -43,6 +43,13 @@
     <string name="imc_history_txt_descripcion">Últimos registros de peso, talla e IMC.</string>
     <string name="imc_history_txt_empty">Aún no tienes registros de IMC.</string>
 
+    <!-- Item histórico IMC -->
+    <string name="imc_record_sample_date">18/01/2025 10:30</string>
+    <string name="imc_record_sample_weight_height">Peso: 72.5 kg   Talla: 1.73 m</string>
+    <string name="imc_record_sample_perimeter">Perímetro abdominal: 90.0 cm</string>
+    <string name="imc_record_sample_imc">IMC: 24.2 (Normal)</string>
+    <string name="imc_record_sync_status_synced">Sincronizado</string>
+
     <!-- IMC New Fragment -->
     <string name="imc_new_txt_titulo">Nuevo registro de IMC</string>
     <string name="imc_new_hint_peso">Peso (kg)</string>

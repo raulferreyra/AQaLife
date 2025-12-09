@@ -17,35 +17,35 @@
             android:id="@+id/tvDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="18/01/2025 10:30"
+            android:text="@string/imc_record_sample_date"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvPesoTalla"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Peso: 72.5 kg   Talla: 1.73 m"
+            android:text="@string/imc_record_sample_weight_height"
             android:paddingTop="4dp" />
 
         <TextView
             android:id="@+id/tvPerimetro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Perímetro abdominal: 90.0 cm"
+            android:text="@string/imc_record_sample_perimeter"
             android:paddingTop="2dp" />
 
         <TextView
             android:id="@+id/tvImc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="IMC: 24.2 (Normal)"
+            android:text="@string/imc_record_sample_imc"
             android:paddingTop="2dp" />
 
         <TextView
             android:id="@+id/tvSyncStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sincronizado"
+            android:text="@string/imc_record_sync_status_synced"
             android:textSize="12sp"
             android:paddingTop="2dp" />
 
