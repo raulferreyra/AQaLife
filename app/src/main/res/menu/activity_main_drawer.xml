@@ -13,5 +13,8 @@
         <item
             android:id="@+id/nav_imc_historic"
             android:title="IMC histórico" />
+        <item
+            android:id="@+id/nav_imc_new"
+            android:title="Volver a pesar" />
     </group>
 </menu>
