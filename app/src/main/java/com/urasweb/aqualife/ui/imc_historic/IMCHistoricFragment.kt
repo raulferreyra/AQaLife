@@ -17,11 +17,11 @@ import com.urasweb.aqualife.data.local.AquaDatabase
 import com.urasweb.aqualife.data.repository.AquaRepository
 import kotlinx.coroutines.launch
 
-class ImcHistoricFragment : Fragment() {
+class IMCHistoricFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyView: TextView
-    private val adapter = ImcHistoricAdapter()
+    private val adapter = IMCHistoricAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,

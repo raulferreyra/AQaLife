@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ImcHistoricAdapter : RecyclerView.Adapter<ImcHistoricAdapter.ImcViewHolder>() {
+class IMCHistoricAdapter : RecyclerView.Adapter<IMCHistoricAdapter.ImcViewHolder>() {
 
     private val items = mutableListOf<ImcRecordEntity>()
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())

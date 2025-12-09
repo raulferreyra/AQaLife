@@ -1,4 +1,4 @@
-package com.urasweb.aqualife.ui.imc
+package com.urasweb.aqualife.ui.imc_new
 
 import android.content.Context
 import android.os.Bundle
@@ -19,7 +19,7 @@ import com.urasweb.aqualife.sync.SyncManager
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
-class ImcNewFragment : Fragment() {
+class IMCNewFragment : Fragment() {
 
     private lateinit var layoutPeso: TextInputLayout
     private lateinit var layoutPerimetro: TextInputLayout
