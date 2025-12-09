@@ -23,4 +23,7 @@ interface ImcDao {
     @Query("SELECT * FROM imc_history WHERE userId = :userId ORDER BY updatedAt DESC")
     suspend fun getHistoryForUser(userId: String): List<ImcRecordEntity>
 
+    // Sólo los últimos N registros
+    @Query("SELECT * FROM imc_history WHERE userId = :userId ORDER BY updatedAt DESC LIMIT :limit")
+    suspend fun getLastRecordsForUser(userId: String, limit: Int): List<ImcRecordEntity>
 }

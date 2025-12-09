@@ -117,6 +117,12 @@ object AquaRepository {
         db.imcDao().insert(record)
     }
 
+    suspend fun getLastImcRecordsForCurrentUser(limit: Int = 5): List<ImcRecordEntity> {
+        val uid = currentUserId
+            ?: throw IllegalStateException("Current user not set in AquaRepository")
+        return db.imcDao().getLastRecordsForUser(uid, limit)
+    }
+
     private fun clasificarImc(imc: Double): String {
         return when {
             imc < 18.5 -> "Bajo peso"
