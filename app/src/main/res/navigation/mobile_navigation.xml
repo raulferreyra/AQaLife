@@ -31,9 +31,21 @@
 
     <fragment
         android:id="@+id/nav_imc_historic"
-        android:name="com.urasweb.aqualife.ui.imc_historic.ImcHistoricFragment"
+        android:name="com.urasweb.aqualife.ui.imc_historic.IMCHistoricFragment"
         android:label="IMC Histórico"
         tools:layout="@layout/fragment_imc_historic" />
+
+    <fragment
+        android:id="@+id/nav_measure"
+        android:name="com.urasweb.aqualife.ui.measures.MeasureFragment"
+        android:label="Medias"
+        tools:layout="@layout/fragment_measure" />
+
+    <fragment
+        android:id="@+id/nav_reminder"
+        android:name="com.urasweb.aqualife.ui.reminders.ReminderFragment"
+        android:label="Recordatorios"
+        tools:layout="@layout/fragment_reminder" />
 
     <fragment
         android:id="@+id/nav_setup"

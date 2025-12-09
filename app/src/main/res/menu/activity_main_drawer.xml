@@ -16,5 +16,11 @@
         <item
             android:id="@+id/nav_imc_new"
             android:title="Volver a pesar" />
+        <item
+            android:id="@+id/nav_reminder"
+            android:title="Recordatorios" />
+        <item
+            android:id="@+id/nav_measure"
+            android:title="Medidas" />
     </group>
 </menu>
