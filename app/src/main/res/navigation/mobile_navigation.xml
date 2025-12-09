@@ -24,6 +24,12 @@
         tools:layout="@layout/fragment_personal_info" />
 
     <fragment
+        android:id="@+id/nav_imc_historic"
+        android:name="com.urasweb.aqualife.ui.imc_historic.ImcHistoricFragment"
+        android:label="@string/menu_personal_info"
+        tools:layout="@layout/fragment_imc_historic" />
+
+    <fragment
         android:id="@+id/nav_setup"
         android:name="com.urasweb.aqualife.ui.setup.SetupFragment"
         android:label="@string/menu_personal_info"
