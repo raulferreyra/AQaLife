@@ -1,5 +1,8 @@
 <resources>
+    <!-- App -->
     <string name="app_name">AQuaLife</string>
+
+    <!-- Drawer / navegación -->
     <string name="navigation_drawer_open">Abrir menú</string>
     <string name="navigation_drawer_close">Cerrar menú</string>
     <string name="nav_header_title">AQuaLife</string>
@@ -7,29 +10,98 @@
     <string name="nav_header_desc">AQuaLife</string>
     <string name="action_settings">Settings</string>
 
-    <!-- Menu -->
+    <!-- Menú principal -->
     <string name="menu_login">Inicio de Sesión</string>
     <string name="menu_home">Dashboard</string>
     <string name="menu_personal_info">Información personal</string>
+    <string name="menu_reminders">Recordatorios</string>
+    <string name="menu_measures">Unidades de medida</string>
+    <string name="menu_imc_history">Historial de IMC</string>
+
     <!-- Login Fragment -->
     <string name="login_txt_titulo">Inicio de Sesión</string>
-    <!-- Home Fragment -->
-    <string name="home_txt_titulo">Dashboard</string>
-    <!-- Settings Fragment -->
-    <string name="settings_txt_titulo">Bienvenido, ingresa tus datos</string>
-    <string name="settings_txt_talla">Talla (cm)</string>
-    <string name="settings_txt_peso">Peso (kg)</string>
-    <string name="settings_txt_nacimiento">Fecha de nacimiento (dd/mm/aaaa)</string>
-    <string name="settings_txt_guardar">Guardar y continuar</string>
-    <!-- Strings related to login -->
     <string name="prompt_email">Correo Electrónico</string>
     <string name="prompt_password">Contraseña</string>
     <string name="action_sign_in">Entra o Regístrate</string>
     <string name="action_sign_in_short">Acceder</string>
-    <string name="welcome">"¡Bienvenido!"</string>
+    <string name="welcome">¡Bienvenido!</string>
     <string name="invalid_username">No es un usuario válido</string>
     <string name="invalid_password">La contraseña debe de tener más de 5 caractéres</string>
-    <string name="login_failed">"Login falló"</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="login_failed">Login falló</string>
+
+    <!-- Home Fragment -->
+    <string name="home_txt_saludo_default">Hola</string>
+    <string name="home_txt_titulo">Dashboard</string>
+    <string name="home_txt_imc_label">IMC:</string>
+    <string name="home_txt_abd_risk_title">Riesgo abdominal</string>
+    <string name="home_txt_user_data_title">Datos del usuario</string>
+    <string name="home_txt_history_title">Histórico (últimos 5 registros)</string>
+    <string name="home_btn_weigh_again">Volver a pesar</string>
+
+    <!-- IMC Historic Fragment -->
+    <string name="imc_history_txt_titulo">Historial de IMC</string>
+    <string name="imc_history_txt_descripcion">Últimos registros de peso, talla e IMC.</string>
+    <string name="imc_history_txt_empty">Aún no tienes registros de IMC.</string>
+
+    <!-- IMC New Fragment -->
+    <string name="imc_new_txt_titulo">Nuevo registro de IMC</string>
+    <string name="imc_new_hint_peso">Peso (kg)</string>
+    <string name="imc_new_hint_perimetro">Perímetro abdominal (cm)</string>
+    <string name="imc_new_btn_guardar">Guardar</string>
+
+    <!-- Settings / Setup Fragment -->
+    <string name="settings_txt_titulo">Bienvenido, ingresa tus datos</string>
+    <string name="settings_txt_talla">Talla (cm)</string>
+    <string name="settings_txt_peso">Peso (kg)</string>
+    <string name="settings_txt_nacimiento">Fecha de nacimiento (dd/mm/aaaa)</string>
+    <string name="settings_txt_sexo">Sexo</string>
+    <string name="settings_txt_masculino">Masculino</string>
+    <string name="settings_txt_femenino">Femenino</string>
+    <string name="settings_txt_guardar">Guardar y continuar</string>
+
+    <!-- Personal Info Fragment -->
+    <string name="personal_txt_titulo">Información personal</string>
+    <string name="personal_hint_nombre">Nombre</string>
+    <string name="personal_hint_apellido">Apellido</string>
+    <string name="personal_txt_sexo">Sexo</string>
+    <string name="personal_txt_masculino">Masculino</string>
+    <string name="personal_txt_femenino">Femenino</string>
+    <string name="personal_hint_fecha_nac">Fecha de nacimiento (dd/MM/aaaa)</string>
+    <string name="personal_hint_meta_agua">Meta diaria de agua (ml)</string>
+    <string name="personal_btn_guardar">Guardar</string>
+
+    <!-- Measures Fragment -->
+    <string name="measures_txt_titulo">Unidades de medida</string>
+    <string name="measures_txt_longitud">Longitud</string>
+    <string name="measures_txt_metros">Metros</string>
+    <string name="measures_txt_pies">Pies</string>
+    <string name="measures_txt_volumen">Volumen</string>
+    <string name="measures_txt_mililitros">Mililitros</string>
+    <string name="measures_txt_onzas">Onzas</string>
+    <string name="measures_txt_peso">Peso</string>
+    <string name="measures_txt_kilos">Kilos</string>
+    <string name="measures_txt_libras">Libras</string>
+    <string name="measures_btn_guardar">Guardar</string>
+
+    <!-- Reminders Fragment -->
+    <string name="reminders_txt_bebidas_title">Recordatorios de bebidas</string>
+    <string name="reminders_txt_30min">30 min</string>
+    <string name="reminders_txt_60min">60 min</string>
+    <string name="reminders_txt_120min">120 min</string>
+    <string name="reminders_txt_bebidas_enable">Activar recordatorio de bebidas</string>
+
+    <string name="reminders_txt_peso_title">Recordatorios de peso</string>
+    <string name="reminders_txt_7dias">7 días</string>
+    <string name="reminders_txt_15dias">15 días</string>
+    <string name="reminders_txt_30dias">30 días</string>
+    <string name="reminders_txt_peso_enable">Activar recordatorio de peso</string>
+
+    <string name="reminders_txt_horario_title">Horario de recordatorios</string>
+    <string name="reminders_txt_inicio">Inicio:</string>
+    <string name="reminders_txt_fin">Fin:</string>
+    <string name="reminders_btn_cambiar">Cambiar</string>
+    <string name="reminders_btn_guardar">Guardar</string>
+
+    <!-- Misceláneo -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
