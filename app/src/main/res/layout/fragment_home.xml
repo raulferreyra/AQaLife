@@ -10,6 +10,15 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Saludo -->
+        <TextView
+            android:id="@+id/txtGreeting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hola"
+            android:textSize="18sp"
+            android:paddingBottom="4dp" />
+
         <TextView
             android:id="@+id/txtTituloDashboard"
             android:layout_width="match_parent"
@@ -32,16 +41,52 @@
             android:id="@+id/imcGauge"
             android:layout_width="match_parent"
             android:layout_height="80dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Botón para registrar nuevo IMC -->
+        <Button
+            android:id="@+id/btnVolverAPesar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Volver a pesar"
             android:layout_marginBottom="16dp" />
 
-        <!-- Bloque 2: datos registrados ABAJO -->
+        <!-- Bloque 2: Riesgo abdominal -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Riesgo abdominal"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <com.urasweb.aqualife.ui.home.AbdominalRiskGaugeView
+            android:id="@+id/abdGauge"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/txtPerimetro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:paddingTop="4dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/txtRiesgoPerimetro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <!-- Bloque 3: datos registrados ABAJO -->
         <TextView
             android:id="@+id/txtDatosUsuario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Datos del usuario"
             android:textStyle="bold"
-            android:paddingTop="8dp"
+            android:paddingTop="12dp"
             android:paddingBottom="4dp" />
 
         <TextView
@@ -50,19 +95,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/txtPerimetro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:paddingTop="12dp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/txtRiesgoPerimetro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
+        <!-- Más adelante aquí irá el histórico (peso / perímetro) -->
 
     </LinearLayout>
 </ScrollView>

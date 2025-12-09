@@ -8,21 +8,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.urasweb.aqualife.R
 import com.urasweb.aqualife.WaterReminderReceiver
 import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
+    private lateinit var txtGreeting: TextView
     private lateinit var txtResumenImc: TextView
     private lateinit var txtResumenDatos: TextView
     private lateinit var imcGauge: ImcGaugeView
 
     private lateinit var txtPerimetro: TextView
     private lateinit var txtRiesgoPerimetro: TextView
+    private lateinit var abdGauge: AbdominalRiskGaugeView
+
+    private lateinit var btnVolverAPesar: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,12 +42,24 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        txtGreeting = view.findViewById(R.id.txtGreeting)
         txtResumenImc = view.findViewById(R.id.txtResumenImc)
         txtResumenDatos = view.findViewById(R.id.txtResumenDatos)
         imcGauge = view.findViewById(R.id.imcGauge)
 
         txtPerimetro = view.findViewById(R.id.txtPerimetro)
         txtRiesgoPerimetro = view.findViewById(R.id.txtRiesgoPerimetro)
+        abdGauge = view.findViewById(R.id.abdGauge)
+
+        btnVolverAPesar = view.findViewById(R.id.btnVolverAPesar)
+
+        // Saludo usando nombre desde Firestore, si existe
+        cargarNombreUsuario()
+
+        // Navegar a IMCNewFragment (ajusta el id si tu nav_graph usa otro)
+        btnVolverAPesar.setOnClickListener {
+            findNavController().navigate(R.id.nav_imc_new)
+        }
 
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val freqMin = prefs.getInt(KEY_FREQ_MINUTOS, 60)
@@ -60,9 +79,13 @@ class HomeFragment : Fragment() {
 
             txtPerimetro.visibility = View.VISIBLE
             txtRiesgoPerimetro.visibility = View.VISIBLE
+
+            // Actualizar gauge abdominal
+            abdGauge.setPerimetro(perimetro)
         } else {
             txtPerimetro.visibility = View.GONE
             txtRiesgoPerimetro.visibility = View.GONE
+            abdGauge.setPerimetro(0f)
         }
 
         val notificacionesPorDia = when (freqMin) {
@@ -75,7 +98,6 @@ class HomeFragment : Fragment() {
         val tieneDatos = prefs.contains(KEY_ALTURA) && prefs.contains(KEY_PESO)
 
         if (!tieneDatos) {
-            // No hay datos: ir a Setup (B)
             findNavController().navigate(R.id.nav_setup)
             return
         }
@@ -97,7 +119,6 @@ class HomeFragment : Fragment() {
 
         programarNotificaciones(freqMin)
 
-        // Bloque de IMC + recomendación (ARRIBA)
         val textoImc = """
             IMC: ${"%.2f".format(imc)}
             Categoría: ${rec.categoria}
@@ -105,16 +126,39 @@ class HomeFragment : Fragment() {
         """.trimIndent()
         txtResumenImc.text = textoImc
 
-        // Actualizar KPI
         imcGauge.setImc(imc)
 
-        // Bloque de datos del usuario (ABAJO)
         val textoDatos = """
             Peso: ${"%.1f".format(pesoKg)} kg
             Talla: ${"%.1f".format(alturaCm)} cm
             Fecha nacimiento: $fechaNac
         """.trimIndent()
         txtResumenDatos.text = textoDatos
+    }
+
+    private fun cargarNombreUsuario() {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+
+        if (user == null) {
+            txtGreeting.text = "Hola"
+            return
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(user.uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val nombre = snapshot.getString("nombre")
+                txtGreeting.text = if (!nombre.isNullOrBlank()) {
+                    "Hola $nombre"
+                } else {
+                    "Hola"
+                }
+            }
+            .addOnFailureListener {
+                txtGreeting.text = "Hola"
+            }
     }
 
     private fun calcularImc(pesoKg: Float, tallaCm: Float): Double {
@@ -124,12 +168,12 @@ class HomeFragment : Fragment() {
 
     data class RecomendacionAgua(
         val categoria: String,
-        val texto: String,     // "2.5 – 3 L (10 – 12 vasos)"
+        val texto: String,
         val litrosMin: Double,
         val litrosMax: Double
     )
 
-    private fun obtenerRecomendacion(imc: Double): RecomendacionAgua  {
+    private fun obtenerRecomendacion(imc: Double): RecomendacionAgua {
         return when {
             imc < 18.5 -> RecomendacionAgua(
                 "Bajo peso",
@@ -183,7 +227,6 @@ class HomeFragment : Fragment() {
             set(Calendar.HOUR_OF_DAY, 9)
             set(Calendar.MINUTE, 0)
 
-            // si ya pasó las 19:00, empezamos mañana
             if (get(Calendar.HOUR_OF_DAY) >= 19) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -191,7 +234,6 @@ class HomeFragment : Fragment() {
 
         val intervaloMs = freqMin * 60 * 1000L
 
-        // setRepeating es suficiente para el trabajo del curso
         alarmManager.setRepeating(
             AlarmManager.RTC_WAKEUP,
             calendar.timeInMillis,
@@ -199,7 +241,6 @@ class HomeFragment : Fragment() {
             pendingIntent
         )
     }
-
 
     companion object {
         private const val PREFS_NAME = "imc_prefs"
