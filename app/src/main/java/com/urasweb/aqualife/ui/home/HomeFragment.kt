@@ -4,19 +4,26 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.urasweb.aqualife.R
 import com.urasweb.aqualife.WaterReminderReceiver
+import com.urasweb.aqualife.data.local.AquaDatabase
+import com.urasweb.aqualife.data.local.ImcRecordEntity
+import com.urasweb.aqualife.data.repository.AquaRepository
 import java.util.Calendar
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
 
@@ -28,6 +35,9 @@ class HomeFragment : Fragment() {
     private lateinit var txtPerimetro: TextView
     private lateinit var txtRiesgoPerimetro: TextView
     private lateinit var abdGauge: AbdominalRiskGaugeView
+
+    private lateinit var txtHistoricoTitle: TextView
+    private lateinit var imcHistoryChart: ImcHistoryChartView
 
     private lateinit var btnVolverAPesar: Button
 
@@ -42,6 +52,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Views
         txtGreeting = view.findViewById(R.id.txtGreeting)
         txtResumenImc = view.findViewById(R.id.txtResumenImc)
         txtResumenDatos = view.findViewById(R.id.txtResumenDatos)
@@ -51,12 +62,15 @@ class HomeFragment : Fragment() {
         txtRiesgoPerimetro = view.findViewById(R.id.txtRiesgoPerimetro)
         abdGauge = view.findViewById(R.id.abdGauge)
 
+        txtHistoricoTitle = view.findViewById(R.id.txtHistoricoTitle)
+        imcHistoryChart = view.findViewById(R.id.imcHistoryChart)
+
         btnVolverAPesar = view.findViewById(R.id.btnVolverAPesar)
 
-        // Saludo usando nombre desde Firestore, si existe
+        // Saludo
         cargarNombreUsuario()
 
-        // Navegar a IMCNewFragment (ajusta el id si tu nav_graph usa otro)
+        // Botón para ir a IMCNewFragment
         btnVolverAPesar.setOnClickListener {
             findNavController().navigate(R.id.nav_imc_new)
         }
@@ -64,7 +78,112 @@ class HomeFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val freqMin = prefs.getInt(KEY_FREQ_MINUTOS, 60)
 
-        val perimetro = prefs.getFloat("perimetro_abd", 0f)
+        // Cargar historial (últimos 5), actualizar prefs con el último registro
+        // y luego renderizar el dashboard con esos datos
+        viewLifecycleOwner.lifecycleScope.launch {
+            actualizarDesdeHistorialImc(prefs)
+            renderizarDashboard(prefs, freqMin)
+        }
+    }
+
+    // --------------------------------------------------------------------
+    // 1) Cargar nombre desde Firestore para "Hola %Nombre%"
+    // --------------------------------------------------------------------
+    private fun cargarNombreUsuario() {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+
+        if (user == null) {
+            txtGreeting.text = "Hola"
+            return
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(user.uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val nombre = snapshot.getString("nombre")
+                txtGreeting.text = if (!nombre.isNullOrBlank()) {
+                    "Hola $nombre"
+                } else {
+                    "Hola"
+                }
+            }
+            .addOnFailureListener {
+                txtGreeting.text = "Hola"
+            }
+    }
+
+    // --------------------------------------------------------------------
+    // 2) Leer últimos 5 registros de IMC desde Room y actualizar prefs
+    //    + gráfico histórico
+    // --------------------------------------------------------------------
+    private suspend fun actualizarDesdeHistorialImc(prefs: SharedPreferences) {
+        try {
+            val appContext = requireContext().applicationContext
+            AquaDatabase.init(appContext)
+            val db = AquaDatabase.getInstance()
+            AquaRepository.init(db)
+
+            val auth = FirebaseAuth.getInstance()
+            val user = auth.currentUser
+            if (user == null) {
+                txtHistoricoTitle.visibility = View.GONE
+                imcHistoryChart.visibility = View.GONE
+                return
+            }
+
+            AquaRepository.setCurrentUser(user.uid)
+
+            val records: List<ImcRecordEntity> =
+                AquaRepository.getLastImcRecordsForCurrentUser(limit = 5)
+
+            if (records.isEmpty()) {
+                txtHistoricoTitle.visibility = View.GONE
+                imcHistoryChart.visibility = View.GONE
+                return
+            }
+
+            val ordered = records.sortedBy { it.updatedAt }
+            val last = ordered.last()
+
+            val pesoActual = last.pesoKg.toFloat()
+            val tallaActualCm = (last.tallaM * 100f).toFloat()
+            val perimetroActual = last.perimetroAbdominalCm.toFloat()
+
+            // Actualizar prefs para que el Dashboard siempre use el último registro
+            prefs.edit()
+                .putFloat(KEY_PESO, pesoActual)
+                .putFloat(KEY_ALTURA, tallaActualCm)
+                .putFloat(KEY_PERIMETRO_ABD, perimetroActual)
+                .apply()
+
+            // Datos para el gráfico (solo hasta 5)
+            val pesos = ordered.map { it.pesoKg.toFloat() }
+            val perimetros = ordered.map { it.perimetroAbdominalCm.toFloat() }
+
+            imcHistoryChart.setData(pesos, perimetros)
+            txtHistoricoTitle.visibility = View.VISIBLE
+            imcHistoryChart.visibility = View.VISIBLE
+
+        } catch (e: Exception) {
+            // Si falla el historial, lo ocultamos y seguimos con el Dashboard
+            txtHistoricoTitle.visibility = View.GONE
+            imcHistoryChart.visibility = View.GONE
+            Toast.makeText(
+                requireContext(),
+                "No se pudo cargar el histórico de IMC",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    // --------------------------------------------------------------------
+    // 3) Renderizar Dashboard con datos en SharedPreferences
+    // --------------------------------------------------------------------
+    private fun renderizarDashboard(prefs: SharedPreferences, freqMin: Int) {
+        // PERÍMETRO ABDOMINAL + GAUGE
+        val perimetro = prefs.getFloat(KEY_PERIMETRO_ABD, 0f)
 
         if (perimetro > 0f) {
             val textoPerimetro = "Perímetro abdominal: ${"%.1f".format(perimetro)} cm"
@@ -73,14 +192,13 @@ class HomeFragment : Fragment() {
             val riesgo = when {
                 perimetro < 80f -> "Riesgo bajo por grasa abdominal."
                 perimetro < 94f -> "Riesgo moderado por grasa abdominal."
-                else            -> "Riesgo alto por grasa abdominal."
+                else -> "Riesgo alto por grasa abdominal."
             }
             txtRiesgoPerimetro.text = riesgo
 
             txtPerimetro.visibility = View.VISIBLE
             txtRiesgoPerimetro.visibility = View.VISIBLE
 
-            // Actualizar gauge abdominal
             abdGauge.setPerimetro(perimetro)
         } else {
             txtPerimetro.visibility = View.GONE
@@ -88,6 +206,7 @@ class HomeFragment : Fragment() {
             abdGauge.setPerimetro(0f)
         }
 
+        // Notificaciones por día
         val notificacionesPorDia = when (freqMin) {
             30 -> 20
             60 -> 10
@@ -95,8 +214,8 @@ class HomeFragment : Fragment() {
             else -> 10
         }
 
+        // Validar que haya datos básicos
         val tieneDatos = prefs.contains(KEY_ALTURA) && prefs.contains(KEY_PESO)
-
         if (!tieneDatos) {
             findNavController().navigate(R.id.nav_setup)
             return
@@ -106,6 +225,7 @@ class HomeFragment : Fragment() {
         val pesoKg = prefs.getFloat(KEY_PESO, 0f)
         val fechaNac = prefs.getString(KEY_FECHA, "-")
 
+        // Cálculo de IMC + recomendación de agua
         val imc = calcularImc(pesoKg, alturaCm)
         val rec = obtenerRecomendacion(imc)
 
@@ -136,31 +256,9 @@ class HomeFragment : Fragment() {
         txtResumenDatos.text = textoDatos
     }
 
-    private fun cargarNombreUsuario() {
-        val auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser
-
-        if (user == null) {
-            txtGreeting.text = "Hola"
-            return
-        }
-
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users").document(user.uid)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val nombre = snapshot.getString("nombre")
-                txtGreeting.text = if (!nombre.isNullOrBlank()) {
-                    "Hola $nombre"
-                } else {
-                    "Hola"
-                }
-            }
-            .addOnFailureListener {
-                txtGreeting.text = "Hola"
-            }
-    }
-
+    // --------------------------------------------------------------------
+    // 4) Lógica de IMC / Agua / Notificaciones (la que ya tenías)
+    // --------------------------------------------------------------------
     private fun calcularImc(pesoKg: Float, tallaCm: Float): Double {
         val tallaM = tallaCm / 100f
         return (pesoKg / (tallaM * tallaM)).toDouble()
@@ -248,5 +346,6 @@ class HomeFragment : Fragment() {
         private const val KEY_PESO = "peso_kg"
         private const val KEY_FECHA = "fecha_nac"
         private const val KEY_FREQ_MINUTOS = "60"
+        private const val KEY_PERIMETRO_ABD = "perimetro_abd"
     }
 }
