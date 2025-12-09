@@ -1,14 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.measure.MeasureFragment">
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</FrameLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Unidades de medida"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:paddingBottom="12dp" />
+
+        <!-- Longitud -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Longitud"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <RadioGroup
+            android:id="@+id/rgLongitud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbLongitudM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Metros" />
+
+            <RadioButton
+                android:id="@+id/rbLongitudFt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pies" />
+        </RadioGroup>
+
+        <!-- Volumen -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Volumen"
+            android:textStyle="bold"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp" />
+
+        <RadioGroup
+            android:id="@+id/rgVolumen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbVolumenMl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mililitros" />
+
+            <RadioButton
+                android:id="@+id/rbVolumenOz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Onzas" />
+        </RadioGroup>
+
+        <!-- Peso -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Peso"
+            android:textStyle="bold"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp" />
+
+        <RadioGroup
+            android:id="@+id/rgPesoUnidad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbPesoKg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kilos" />
+
+            <RadioButton
+                android:id="@+id/rbPesoLb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Libras" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnGuardarUnidades"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GUARDAR"
+            android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+</ScrollView>

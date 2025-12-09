@@ -1,60 +1,130 @@
-package com.urasweb.aqualife.ui.measure
+package com.urasweb.aqualife.ui.measures
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.urasweb.aqualife.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MeasureFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MeasureFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var rgLongitud: RadioGroup
+    private lateinit var rbLongitudM: RadioButton
+    private lateinit var rbLongitudFt: RadioButton
+
+    private lateinit var rgVolumen: RadioGroup
+    private lateinit var rbVolumenMl: RadioButton
+    private lateinit var rbVolumenOz: RadioButton
+
+    private lateinit var rgPesoUnidad: RadioGroup
+    private lateinit var rbPesoKg: RadioButton
+    private lateinit var rbPesoLb: RadioButton
+
+    private lateinit var btnGuardar: Button
+
+    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_measure, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MeasureFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MeasureFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        rgLongitud = view.findViewById(R.id.rgLongitud)
+        rbLongitudM = view.findViewById(R.id.rbLongitudM)
+        rbLongitudFt = view.findViewById(R.id.rbLongitudFt)
+
+        rgVolumen = view.findViewById(R.id.rgVolumen)
+        rbVolumenMl = view.findViewById(R.id.rbVolumenMl)
+        rbVolumenOz = view.findViewById(R.id.rbVolumenOz)
+
+        rgPesoUnidad = view.findViewById(R.id.rgPesoUnidad)
+        rbPesoKg = view.findViewById(R.id.rbPesoKg)
+        rbPesoLb = view.findViewById(R.id.rbPesoLb)
+
+        btnGuardar = view.findViewById(R.id.btnGuardarUnidades)
+
+        btnGuardar.setOnClickListener { guardarUnidades() }
+
+        cargarDesdeFirestore()
+    }
+
+    private fun cargarDesdeFirestore() {
+        val user = auth.currentUser ?: return
+
+        db.collection("users").document(user.uid)
+            .collection("settings")
+            .document("units")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.exists()) return@addOnSuccessListener
+
+                when (snapshot.getString("longitud") ?: "m") {
+                    "ft" -> rbLongitudFt.isChecked = true
+                    else -> rbLongitudM.isChecked = true
                 }
+
+                when (snapshot.getString("volumen") ?: "ml") {
+                    "oz" -> rbVolumenOz.isChecked = true
+                    else -> rbVolumenMl.isChecked = true
+                }
+
+                when (snapshot.getString("peso") ?: "kg") {
+                    "lb" -> rbPesoLb.isChecked = true
+                    else -> rbPesoKg.isChecked = true
+                }
+            }
+    }
+
+    private fun guardarUnidades() {
+        val user = auth.currentUser
+        if (user == null) {
+            Toast.makeText(requireContext(), "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val longitud = if (rgLongitud.checkedRadioButtonId == R.id.rbLongitudFt) "ft" else "m"
+        val volumen = if (rgVolumen.checkedRadioButtonId == R.id.rbVolumenOz) "oz" else "ml"
+        val peso = if (rgPesoUnidad.checkedRadioButtonId == R.id.rbPesoLb) "lb" else "kg"
+
+        val data = hashMapOf(
+            "longitud" to longitud,
+            "volumen" to volumen,
+            "peso" to peso,
+            "updatedAt" to FieldValue.serverTimestamp()
+        )
+
+        db.collection("users").document(user.uid)
+            .collection("settings")
+            .document("units")
+            .set(data)
+            .addOnSuccessListener {
+                Toast.makeText(
+                    requireContext(),
+                    "Unidades guardadas",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    requireContext(),
+                    "Error al guardar unidades: ${e.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
     }
 }
