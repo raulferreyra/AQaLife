@@ -82,6 +82,40 @@ object AquaRepository {
         return db.imcDao().getHistoryForUser(uid)
     }
 
+    suspend fun addImcMeasurement(
+        pesoKg: Float,
+        tallaM: Float,
+        perimetroAbdominalCm: Float
+    ) {
+        val uid = currentUserId
+            ?: throw IllegalStateException("Current user not set in AquaRepository")
+
+        val pesoRedondeado = round(pesoKg * 10f) / 10.0
+        val tallaRedondeada = round(tallaM * 100f) / 100.0
+        val perimetroRedondeado = round(perimetroAbdominalCm * 10f) / 10.0
+
+        val imc = if (tallaRedondeada > 0.0) {
+            round((pesoRedondeado / (tallaRedondeada * tallaRedondeada)) * 10.0) / 10.0
+        } else {
+            0.0
+        }
+
+        val clasificacion = clasificarImc(imc)
+
+        val record = ImcRecordEntity(
+            id = UUID.randomUUID().toString(),
+            userId = uid,
+            pesoKg = pesoRedondeado,
+            tallaM = tallaRedondeada,
+            perimetroAbdominalCm = perimetroRedondeado,
+            imc = imc,
+            clasificacionImc = clasificacion,
+            updatedAt = System.currentTimeMillis(),
+            syncStatus = SyncStatus.DIRTY
+        )
+
+        db.imcDao().insert(record)
+    }
 
     private fun clasificarImc(imc: Double): String {
         return when {
