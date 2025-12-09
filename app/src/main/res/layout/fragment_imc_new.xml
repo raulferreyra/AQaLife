@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nuevo registro de IMC"
+            android:text="@string/imc_new_txt_titulo"
             android:textStyle="bold"
             android:textSize="20sp"
             android:paddingBottom="8dp" />
@@ -22,7 +22,7 @@
             android:id="@+id/layoutPeso"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Peso (kg)">
+            android:hint="@string/imc_new_hint_peso">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputPeso"
                 android:layout_width="match_parent"
@@ -35,7 +35,7 @@
             android:id="@+id/layoutPerimetro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Perímetro abdominal (cm)"
+            android:hint="@string/imc_new_hint_perimetro"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputPerimetro"
@@ -48,7 +48,7 @@
             android:id="@+id/btnGuardarImc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GUARDAR"
+            android:text="@string/imc_new_btn_guardar"
             android:layout_marginTop="16dp" />
 
     </LinearLayout>

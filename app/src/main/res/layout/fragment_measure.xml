@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Unidades de medida"
+            android:text="@string/measures_txt_titulo"
             android:textStyle="bold"
             android:textSize="20sp"
             android:paddingBottom="12dp" />
@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Longitud"
+            android:text="@string/measures_txt_longitud"
             android:textStyle="bold"
             android:paddingBottom="4dp" />
 
@@ -35,20 +35,20 @@
                 android:id="@+id/rbLongitudM"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Metros" />
+                android:text="@string/measures_txt_metros" />
 
             <RadioButton
                 android:id="@+id/rbLongitudFt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pies" />
+                android:text="@string/measures_txt_pies" />
         </RadioGroup>
 
         <!-- Volumen -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Volumen"
+            android:text="@string/measures_txt_volumen"
             android:textStyle="bold"
             android:paddingTop="12dp"
             android:paddingBottom="4dp" />
@@ -63,20 +63,20 @@
                 android:id="@+id/rbVolumenMl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mililitros" />
+                android:text="@string/measures_txt_mililitros" />
 
             <RadioButton
                 android:id="@+id/rbVolumenOz"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Onzas" />
+                android:text="@string/measures_txt_onzas" />
         </RadioGroup>
 
         <!-- Peso -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Peso"
+            android:text="@string/measures_txt_peso"
             android:textStyle="bold"
             android:paddingTop="12dp"
             android:paddingBottom="4dp" />
@@ -91,20 +91,20 @@
                 android:id="@+id/rbPesoKg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Kilos" />
+                android:text="@string/measures_txt_kilos" />
 
             <RadioButton
                 android:id="@+id/rbPesoLb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Libras" />
+                android:text="@string/measures_txt_libras" />
         </RadioGroup>
 
         <Button
             android:id="@+id/btnGuardarUnidades"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GUARDAR"
+            android:text="@string/measures_btn_guardar"
             android:layout_marginTop="24dp" />
 
     </LinearLayout>

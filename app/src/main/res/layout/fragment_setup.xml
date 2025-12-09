@@ -83,7 +83,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Sexo"
+            android:text="@string/settings_txt_sexo"
             android:textStyle="bold"
             android:textColor="@android:color/black"
             app:layout_constraintTop_toBottomOf="@id/layoutFechaNac"
@@ -105,13 +105,13 @@
                 android:id="@+id/rbMasculino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Masculino" />
+                android:text="@string/settings_txt_masculino" />
 
             <RadioButton
                 android:id="@+id/rbFemenino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Femenino"
+                android:text="@string/settings_txt_femenino"
                 android:layout_marginStart="16dp" />
         </RadioGroup>
 

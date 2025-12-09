@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recordatorios de bebidas"
+            android:text="@string/reminders_txt_bebidas_title"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingBottom="8dp" />
@@ -28,26 +28,26 @@
                 android:id="@+id/rbAgua30"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="30 min" />
+                android:text="@string/reminders_txt_30min" />
 
             <RadioButton
                 android:id="@+id/rbAgua60"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="60 min" />
+                android:text="@string/reminders_txt_60min" />
 
             <RadioButton
                 android:id="@+id/rbAgua120"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="120 min" />
+                android:text="@string/reminders_txt_120min" />
         </RadioGroup>
 
         <CheckBox
             android:id="@+id/checkAguaEnabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Activar recordatorio de bebidas"
+            android:text="@string/reminders_txt_bebidas_enable"
             android:paddingTop="4dp"
             android:paddingBottom="12dp" />
 
@@ -55,7 +55,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recordatorios de peso"
+            android:text="@string/reminders_txt_peso_title"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingBottom="8dp" />
@@ -70,26 +70,26 @@
                 android:id="@+id/rbPeso7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="7 días" />
+                android:text="@string/reminders_txt_7dias" />
 
             <RadioButton
                 android:id="@+id/rbPeso15"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15 días" />
+                android:text="@string/reminders_txt_15dias" />
 
             <RadioButton
                 android:id="@+id/rbPeso30"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="30 días" />
+                android:text="@string/reminders_txt_30dias" />
         </RadioGroup>
 
         <CheckBox
             android:id="@+id/checkPesoEnabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Activar recordatorio de peso"
+            android:text="@string/reminders_txt_peso_enable"
             android:paddingTop="4dp"
             android:paddingBottom="12dp" />
 
@@ -97,7 +97,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Horario de recordatorios"
+            android:text="@string/reminders_txt_horario_title"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingBottom="8dp" />
@@ -111,7 +111,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Inicio:" />
+                android:text="@string/reminders_txt_inicio" />
 
             <TextView
                 android:id="@+id/txtHoraInicio"
@@ -125,7 +125,7 @@
                 android:id="@+id/btnCambiarHoraInicio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cambiar" />
+                android:text="@string/reminders_btn_cambiar" />
         </LinearLayout>
 
         <LinearLayout
@@ -138,7 +138,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fin:" />
+                android:text="@string/reminders_txt_fin" />
 
             <TextView
                 android:id="@+id/txtHoraFin"
@@ -152,14 +152,14 @@
                 android:id="@+id/btnCambiarHoraFin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cambiar" />
+                android:text="@string/reminders_btn_cambiar" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnGuardarReminders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GUARDAR"
+            android:text="@string/reminders_btn_guardar"
             android:layout_marginTop="24dp" />
 
     </LinearLayout>

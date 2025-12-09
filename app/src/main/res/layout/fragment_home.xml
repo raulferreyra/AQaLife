@@ -15,7 +15,7 @@
             android:id="@+id/txtGreeting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hola"
+            android:text="@string/home_txt_saludo_default"
             android:textSize="18sp"
             android:paddingBottom="4dp" />
 
@@ -23,7 +23,7 @@
             android:id="@+id/txtTituloDashboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dashboard"
+            android:text="@string/home_txt_titulo"
             android:textStyle="bold"
             android:textSize="22sp"
             android:paddingBottom="12dp" />
@@ -33,7 +33,7 @@
             android:id="@+id/txtResumenImc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="IMC:"
+            android:text="@string/home_txt_imc_label"
             android:textSize="16sp"
             android:paddingBottom="8dp" />
 
@@ -46,7 +46,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Riesgo abdominal"
+            android:text="@string/home_txt_abd_risk_title"
             android:textStyle="bold"
             android:paddingBottom="4dp" />
 
@@ -74,7 +74,7 @@
             android:id="@+id/txtDatosUsuario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Datos del usuario"
+            android:text="@string/home_txt_user_data_title"
             android:textStyle="bold"
             android:paddingTop="12dp"
             android:paddingBottom="4dp" />
@@ -90,7 +90,7 @@
             android:id="@+id/txtHistoricoTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Histórico (últimos 5 registros)"
+            android:text="@string/home_txt_history_title"
             android:textStyle="bold"
             android:paddingTop="12dp"
             android:paddingBottom="4dp"
@@ -104,15 +104,12 @@
             android:layout_marginBottom="16dp"
             android:visibility="gone" />
 
-
         <Button
             android:id="@+id/btnVolverAPesar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Volver a pesar"
+            android:text="@string/home_btn_weigh_again"
             android:layout_marginBottom="16dp" />
-
-        <!-- Más adelante aquí irá el histórico (peso / perímetro) -->
 
     </LinearLayout>
 </ScrollView>

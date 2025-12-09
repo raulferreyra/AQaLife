@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Información personal"
+            android:text="@string/personal_txt_titulo"
             android:textStyle="bold"
             android:textSize="20sp"
             android:paddingBottom="12dp" />
@@ -23,7 +23,7 @@
             android:id="@+id/layoutNombre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nombre">
+            android:hint="@string/personal_hint_nombre">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputNombre"
                 android:layout_width="match_parent"
@@ -36,7 +36,7 @@
             android:id="@+id/layoutApellido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Apellido"
+            android:hint="@string/personal_hint_apellido"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputApellido"
@@ -49,7 +49,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sexo"
+            android:text="@string/personal_txt_sexo"
             android:layout_marginTop="12dp" />
 
         <RadioGroup
@@ -62,13 +62,13 @@
                 android:id="@+id/rbMasculino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Masculino" />
+                android:text="@string/personal_txt_masculino" />
 
             <RadioButton
                 android:id="@+id/rbFemenino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Femenino"
+                android:text="@string/personal_txt_femenino"
                 android:layout_marginStart="16dp" />
         </RadioGroup>
 
@@ -77,7 +77,7 @@
             android:id="@+id/layoutFechaNac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Fecha de nacimiento (dd/MM/aaaa)"
+            android:hint="@string/personal_hint_fecha_nac"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputFechaNac"
@@ -91,7 +91,7 @@
             android:id="@+id/layoutMetaAgua"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Meta diaria de agua (ml)"
+            android:hint="@string/personal_hint_meta_agua"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputMetaAgua"
@@ -106,7 +106,7 @@
             android:id="@+id/btnGuardar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar"
+            android:text="@string/personal_btn_guardar"
             android:layout_marginTop="16dp" />
 
     </LinearLayout>

@@ -9,7 +9,7 @@
         android:id="@+id/tvTitulo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Historial de IMC"
+        android:text="@string/imc_history_txt_titulo"
         android:textStyle="bold"
         android:textSize="20sp"
         android:paddingBottom="8dp" />
@@ -18,14 +18,14 @@
         android:id="@+id/tvDescripcion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Últimos registros de peso, talla e IMC."
+        android:text="@string/imc_history_txt_descripcion"
         android:paddingBottom="8dp" />
 
     <TextView
         android:id="@+id/emptyView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aún no tienes registros de IMC."
+        android:text="@string/imc_history_txt_empty"
         android:visibility="gone"
         android:gravity="center_horizontal"
         android:paddingTop="32dp" />
