@@ -43,15 +43,6 @@
             android:layout_height="80dp"
             android:layout_marginBottom="8dp" />
 
-        <!-- Botón para registrar nuevo IMC -->
-        <Button
-            android:id="@+id/btnVolverAPesar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Volver a pesar"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Bloque 2: Riesgo abdominal -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,7 +70,6 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <!-- Bloque 3: datos registrados ABAJO -->
         <TextView
             android:id="@+id/txtDatosUsuario"
             android:layout_width="match_parent"
@@ -94,6 +84,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnVolverAPesar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Volver a pesar"
+            android:layout_marginBottom="16dp" />
 
         <!-- Más adelante aquí irá el histórico (peso / perímetro) -->
 
