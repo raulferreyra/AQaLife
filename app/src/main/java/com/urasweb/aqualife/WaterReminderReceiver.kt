@@ -7,14 +7,31 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import java.util.Calendar
 
 class WaterReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        // Si en algún momento quieres respetar "aguaEnabled" desde prefs, puedes hacer:
-        // val prefs = context.getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
-        // if (!prefs.getBoolean("reminder_agua_enabled", true)) return
+        val prefs = context.getSharedPreferences("reminder_prefs", Context.MODE_PRIVATE)
+
+        val aguaEnabled = prefs.getBoolean("aguaEnabled", true)
+        if (!aguaEnabled) return
+
+        val horaInicio = prefs.getInt("horaInicio", 9)
+        val minutoInicio = prefs.getInt("minutoInicio", 0)
+        val horaFin = prefs.getInt("horaFin", 22)
+        val minutoFin = prefs.getInt("minutoFin", 0)
+
+        val now = Calendar.getInstance()
+        val nowMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+        val startMinutes = horaInicio * 60 + minutoInicio
+        val endMinutes = horaFin * 60 + minutoFin
+
+        // Si estamos fuera del rango horario, no mostramos notificación
+        if (nowMinutes < startMinutes || nowMinutes > endMinutes) {
+            return
+        }
 
         val mensaje = "Oye, tu cuerpo pide agua 🎵"
 
@@ -33,13 +50,12 @@ class WaterReminderReceiver : BroadcastReceiver() {
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_aqualife_icon) // icono pequeño de tu app
+            .setSmallIcon(R.drawable.ic_aqualife_icon)
             .setContentTitle("AQuaLife")
             .setContentText(mensaje)
             .setStyle(NotificationCompat.BigTextStyle().bigText(mensaje))
             .setAutoCancel(true)
 
-        // Usar un ID pseudo-único para permitir múltiples notifs
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }

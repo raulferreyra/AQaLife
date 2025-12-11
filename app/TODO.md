@@ -3,7 +3,7 @@
 - [ ] Ajustar icono de la app
 - [X] Ajustar screensplash
 - [X] Revisar notificaciones en Android 14
-- [ ] Corregir notificaciones, no indicar mL, sino tazas
+- [X] Corregir notificaciones, no indicar mL, sino tazas
 - [X] Agregar Sexo
 - [X] Validar consistencia de datos (volver a Setup si faltan datos críticos)
 - [X] Redondear IMC y valores mostrados a formato presentable (2 decimales fijo)
@@ -18,8 +18,8 @@
   - [X] Agregar Base de datos
   - [X] Agregar función de Sincronización (BD local con BD nube)
   - [ ] Agregar Otras medidas
-  - [ ] Agregar pantalla de Alertas y Notificaciones
-  - [ ] Evitar notificaciones duplicadas (cancelar alarmas previas antes de reprogramar)
+  - [X] Agregar pantalla de Alertas y Notificaciones
+  - [X] Evitar notificaciones duplicadas (cancelar alarmas previas antes de reprogramar)
   - [ ] IOS
   - [X] Login
   - [X] Firebase

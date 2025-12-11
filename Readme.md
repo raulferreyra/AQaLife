@@ -61,7 +61,7 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 - [ ] Ajustar icono final de la app
 - [X] Mejorar SplashScreen
 - [X] Revisar notificaciones en Android 14
-- [ ] Corregir notificaciones (mostrar tazas en vez de mL)
+- [X] Corregir notificaciones (mostrar tazas en vez de mL)
 - [X] Agregar campo **Sexo**
 - [X] Validación revisada de medidas y pesos
 - [X] Validación revisada de fecha de nacimiento

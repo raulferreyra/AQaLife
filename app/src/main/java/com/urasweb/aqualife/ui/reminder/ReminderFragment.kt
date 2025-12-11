@@ -1,5 +1,9 @@
 package com.urasweb.aqualife.ui.reminders
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,6 +21,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.urasweb.aqualife.R
+import com.urasweb.aqualife.WaterReminderReceiver
+import com.urasweb.aqualife.WeightReminderReceiver
 import java.util.Calendar
 
 class ReminderFragment : Fragment() {
@@ -87,7 +93,7 @@ class ReminderFragment : Fragment() {
         // Listeners
         btnCambiarInicio.setOnClickListener { mostrarTimePicker(true) }
         btnCambiarFin.setOnClickListener { mostrarTimePicker(false) }
-        btnGuardar.setOnClickListener { guardarEnFirestore() }
+        btnGuardar.setOnClickListener { guardarEnFirestoreYProgramarAlarmas() }
 
         // Cargar lo que haya en Firestore (si no hay, se quedan los defaults de UI)
         cargarDesdeFirestore()
@@ -192,7 +198,7 @@ class ReminderFragment : Fragment() {
             }
     }
 
-    private fun guardarEnFirestore() {
+    private fun guardarEnFirestoreYProgramarAlarmas() {
         val user = auth.currentUser
         if (user == null) {
             Toast.makeText(requireContext(), "Usuario no autenticado", Toast.LENGTH_SHORT).show()
@@ -213,10 +219,13 @@ class ReminderFragment : Fragment() {
             else -> 7
         }
 
+        val aguaEnabled = checkAguaEnabled.isChecked
+        val pesoEnabled = checkPesoEnabled.isChecked
+
         val data = hashMapOf(
-            "aguaEnabled" to checkAguaEnabled.isChecked,
+            "aguaEnabled" to aguaEnabled,
             "aguaIntervaloMinutos" to intervaloAgua,
-            "pesoEnabled" to checkPesoEnabled.isChecked,
+            "pesoEnabled" to pesoEnabled,
             "pesoFrecuenciaDias" to frecuenciaPesoDias,
             "horaInicio" to horaInicio,
             "minutoInicio" to minutoInicio,
@@ -232,6 +241,22 @@ class ReminderFragment : Fragment() {
 
         docRef.set(data, SetOptions.merge())
             .addOnSuccessListener {
+                // Guardamos también en SharedPreferences para que los receivers puedan leer
+                guardarEnPrefs(
+                    aguaEnabled = aguaEnabled,
+                    intervaloAguaMin = intervaloAgua,
+                    pesoEnabled = pesoEnabled,
+                    frecuenciaPesoDias = frecuenciaPesoDias,
+                    horaInicio = horaInicio,
+                    minutoInicio = minutoInicio,
+                    horaFin = horaFin,
+                    minutoFin = minutoFin
+                )
+
+                // Programar / cancelar alarmas de sistema
+                programarAlarmaAgua(aguaEnabled, intervaloAgua)
+                programarAlarmaPeso(pesoEnabled, frecuenciaPesoDias)
+
                 Toast.makeText(
                     requireContext(),
                     "Recordatorios guardados",
@@ -245,5 +270,133 @@ class ReminderFragment : Fragment() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+    }
+
+    private fun guardarEnPrefs(
+        aguaEnabled: Boolean,
+        intervaloAguaMin: Int,
+        pesoEnabled: Boolean,
+        frecuenciaPesoDias: Int,
+        horaInicio: Int,
+        minutoInicio: Int,
+        horaFin: Int,
+        minutoFin: Int
+    ) {
+        val prefs = requireContext().getSharedPreferences(PREFS_REMINDERS, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_AGUA_ENABLED, aguaEnabled)
+            .putInt(KEY_AGUA_INTERVALO_MIN, intervaloAguaMin)
+            .putBoolean(KEY_PESO_ENABLED, pesoEnabled)
+            .putInt(KEY_PESO_FREQ_DIAS, frecuenciaPesoDias)
+            .putInt(KEY_HORA_INICIO, horaInicio)
+            .putInt(KEY_MINUTO_INICIO, minutoInicio)
+            .putInt(KEY_HORA_FIN, horaFin)
+            .putInt(KEY_MINUTO_FIN, minutoFin)
+            .apply()
+    }
+
+    // --------------------------------------------------------------------
+    // Programación de alarmas
+    // --------------------------------------------------------------------
+
+    private fun programarAlarmaAgua(aguaEnabled: Boolean, intervaloMin: Int) {
+        val context = requireContext().applicationContext
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, WaterReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE_AGUA,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        if (!aguaEnabled) {
+            // Cancelar si está desactivado
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            return
+        }
+
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, horaInicio)
+            set(Calendar.MINUTE, minutoInicio)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Si la hora ya pasó hoy, se programa para mañana
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+
+        val intervaloMs = intervaloMin * 60 * 1000L
+
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            intervaloMs,
+            pendingIntent
+        )
+    }
+
+    private fun programarAlarmaPeso(pesoEnabled: Boolean, frecuenciaDias: Int) {
+        val context = requireContext().applicationContext
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, WeightReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE_PESO,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        if (!pesoEnabled) {
+            // Cancelar si está desactivado
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            return
+        }
+
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, horaInicio)
+            set(Calendar.MINUTE, minutoInicio)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Si la hora ya pasó hoy, que sea a partir de mañana
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+
+        val intervaloMs = frecuenciaDias * 24L * 60L * 60L * 1000L
+
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            intervaloMs,
+            pendingIntent
+        )
+    }
+
+    companion object {
+        // SharedPreferences para recordatorios
+        private const val PREFS_REMINDERS = "reminder_prefs"
+        private const val KEY_AGUA_ENABLED = "aguaEnabled"
+        private const val KEY_AGUA_INTERVALO_MIN = "aguaIntervaloMinutos"
+        private const val KEY_PESO_ENABLED = "pesoEnabled"
+        private const val KEY_PESO_FREQ_DIAS = "pesoFrecuenciaDias"
+        private const val KEY_HORA_INICIO = "horaInicio"
+        private const val KEY_MINUTO_INICIO = "minutoInicio"
+        private const val KEY_HORA_FIN = "horaFin"
+        private const val KEY_MINUTO_FIN = "minutoFin"
+
+        // Request codes para PendingIntent
+        private const val REQUEST_CODE_AGUA = 1001
+        private const val REQUEST_CODE_PESO = 1002
     }
 }
