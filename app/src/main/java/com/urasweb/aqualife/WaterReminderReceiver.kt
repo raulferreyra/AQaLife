@@ -9,13 +9,14 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 
 class WaterReminderReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
 
-        val prefs = context.getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
-        val mlPorNotif = prefs.getFloat("ml_por_notificacion", 100f)
+        // Si en algún momento quieres respetar "aguaEnabled" desde prefs, puedes hacer:
+        // val prefs = context.getSharedPreferences("imc_prefs", Context.MODE_PRIVATE)
+        // if (!prefs.getBoolean("reminder_agua_enabled", true)) return
 
-        val mensaje = "Es momento de beber agua.\n" +
-                "${mlPorNotif.toInt()} ml están bien para este momento y cumplir con tu meta."
+        val mensaje = "Oye, tu cuerpo pide agua 🎵"
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -32,12 +33,13 @@ class WaterReminderReceiver : BroadcastReceiver() {
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_aqualife_icon) // tu icono pequeño
+            .setSmallIcon(R.drawable.ic_aqualife_icon) // icono pequeño de tu app
             .setContentTitle("AQuaLife")
             .setContentText(mensaje)
             .setStyle(NotificationCompat.BigTextStyle().bigText(mensaje))
             .setAutoCancel(true)
 
+        // Usar un ID pseudo-único para permitir múltiples notifs
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }
