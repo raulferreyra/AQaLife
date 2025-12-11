@@ -15,29 +15,34 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.urasweb.aqualife.R
 import java.util.Calendar
 
 class ReminderFragment : Fragment() {
 
+    // UI Agua
     private lateinit var rgAgua: RadioGroup
     private lateinit var rbAgua30: RadioButton
     private lateinit var rbAgua60: RadioButton
     private lateinit var rbAgua120: RadioButton
     private lateinit var checkAguaEnabled: CheckBox
 
+    // UI Peso
     private lateinit var rgPeso: RadioGroup
     private lateinit var rbPeso7: RadioButton
     private lateinit var rbPeso15: RadioButton
     private lateinit var rbPeso30: RadioButton
     private lateinit var checkPesoEnabled: CheckBox
 
+    // UI Horario
     private lateinit var txtHoraInicio: TextView
     private lateinit var txtHoraFin: TextView
     private lateinit var btnCambiarInicio: Button
     private lateinit var btnCambiarFin: Button
     private lateinit var btnGuardar: Button
 
+    // Valores en memoria (por defecto)
     private var horaInicio: Int = 9
     private var minutoInicio: Int = 0
     private var horaFin: Int = 22
@@ -57,6 +62,7 @@ class ReminderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Referencias UI
         rgAgua = view.findViewById(R.id.rgReminderAgua)
         rbAgua30 = view.findViewById(R.id.rbAgua30)
         rbAgua60 = view.findViewById(R.id.rbAgua60)
@@ -75,18 +81,38 @@ class ReminderFragment : Fragment() {
         btnCambiarFin = view.findViewById(R.id.btnCambiarHoraFin)
         btnGuardar = view.findViewById(R.id.btnGuardarReminders)
 
+        // Valores por defecto en UI
+        aplicarValoresPorDefectoUI()
+
+        // Listeners
         btnCambiarInicio.setOnClickListener { mostrarTimePicker(true) }
         btnCambiarFin.setOnClickListener { mostrarTimePicker(false) }
-        btnGuardar.setOnClickListener { guardarReminders() }
+        btnGuardar.setOnClickListener { guardarEnFirestore() }
 
+        // Cargar lo que haya en Firestore (si no hay, se quedan los defaults de UI)
         cargarDesdeFirestore()
+    }
+
+    private fun aplicarValoresPorDefectoUI() {
+        // Agua: 60 minutos, activado
+        rbAgua60.isChecked = true
+        checkAguaEnabled.isChecked = true
+
+        // Peso: 7 días, activado
+        rbPeso7.isChecked = true
+        checkPesoEnabled.isChecked = true
+
+        // Horario 09:00 - 22:00
+        horaInicio = 9
+        minutoInicio = 0
+        horaFin = 22
+        minutoFin = 0
         actualizarTextosHora()
     }
 
     private fun mostrarTimePicker(esInicio: Boolean) {
-        val cal = Calendar.getInstance()
-        val hora = if (esInicio) horaInicio else horaFin
-        val minuto = if (esInicio) minutoInicio else minutoFin
+        val horaActual = if (esInicio) horaInicio else horaFin
+        val minutoActual = if (esInicio) minutoInicio else minutoFin
 
         val dialog = TimePickerDialog(
             requireContext(),
@@ -100,8 +126,8 @@ class ReminderFragment : Fragment() {
                 }
                 actualizarTextosHora()
             },
-            hora,
-            minuto,
+            horaActual,
+            minutoActual,
             true
         )
         dialog.show()
@@ -115,53 +141,63 @@ class ReminderFragment : Fragment() {
     private fun cargarDesdeFirestore() {
         val user = auth.currentUser ?: return
 
-        val remindersRef =
-            db.collection("users").document(user.uid).collection("reminders")
+        val docRef = db.collection("users")
+            .document(user.uid)
+            .collection("settings")
+            .document("reminders")
 
-        // Recordatorio de agua
-        remindersRef.document("agua").get()
+        docRef.get()
             .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    val intervalo = snapshot.getLong("intervaloMinutos")?.toInt() ?: 60
-                    when (intervalo) {
-                        30 -> rbAgua30.isChecked = true
-                        120 -> rbAgua120.isChecked = true
-                        else -> rbAgua60.isChecked = true
-                    }
-                    val enabled = snapshot.getBoolean("enabled") ?: true
-                    checkAguaEnabled.isChecked = enabled
-
-                    snapshot.getLong("horaInicio")?.toInt()?.let { horaInicio = it }
-                    snapshot.getLong("horaFin")?.toInt()?.let { horaFin = it }
-                    actualizarTextosHora()
+                if (!snapshot.exists()) {
+                    // No hay doc: mantenemos los defaults en UI
+                    return@addOnSuccessListener
                 }
+
+                // Agua
+                val aguaEnabled = snapshot.getBoolean("aguaEnabled") ?: true
+                val aguaIntervalo = snapshot.getLong("aguaIntervaloMinutos")?.toInt() ?: 60
+
+                checkAguaEnabled.isChecked = aguaEnabled
+                when (aguaIntervalo) {
+                    30 -> rbAgua30.isChecked = true
+                    120 -> rbAgua120.isChecked = true
+                    else -> rbAgua60.isChecked = true
+                }
+
+                // Peso
+                val pesoEnabled = snapshot.getBoolean("pesoEnabled") ?: true
+                val pesoFrecuenciaDias = snapshot.getLong("pesoFrecuenciaDias")?.toInt() ?: 7
+
+                checkPesoEnabled.isChecked = pesoEnabled
+                when (pesoFrecuenciaDias) {
+                    15 -> rbPeso15.isChecked = true
+                    30 -> rbPeso30.isChecked = true
+                    else -> rbPeso7.isChecked = true
+                }
+
+                // Horario
+                horaInicio = snapshot.getLong("horaInicio")?.toInt() ?: 9
+                minutoInicio = snapshot.getLong("minutoInicio")?.toInt() ?: 0
+                horaFin = snapshot.getLong("horaFin")?.toInt() ?: 22
+                minutoFin = snapshot.getLong("minutoFin")?.toInt() ?: 0
+
+                actualizarTextosHora()
             }
-
-        // Recordatorio de peso
-        remindersRef.document("peso").get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    val frecuencia = snapshot.getString("frecuenciaPeso") ?: "semanal"
-                    when (frecuencia) {
-                        "quincenal" -> rbPeso15.isChecked = true
-                        "mensual" -> rbPeso30.isChecked = true
-                        else -> rbPeso7.isChecked = true
-                    }
-                    val enabled = snapshot.getBoolean("enabled") ?: false
-                    checkPesoEnabled.isChecked = enabled
-                }
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    requireContext(),
+                    "No se pudo cargar recordatorios: ${e.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
     }
 
-    private fun guardarReminders() {
+    private fun guardarEnFirestore() {
         val user = auth.currentUser
         if (user == null) {
             Toast.makeText(requireContext(), "Usuario no autenticado", Toast.LENGTH_SHORT).show()
             return
         }
-
-        val remindersRef =
-            db.collection("users").document(user.uid).collection("reminders")
 
         // Agua
         val intervaloAgua = when (rgAgua.checkedRadioButtonId) {
@@ -170,53 +206,42 @@ class ReminderFragment : Fragment() {
             else -> 60
         }
 
-        val aguaData = hashMapOf(
-            "tipo" to "agua",
-            "intervaloMinutos" to intervaloAgua,
-            "enabled" to checkAguaEnabled.isChecked,
-            "horaInicio" to horaInicio,
-            "horaFin" to horaFin,
-            "updatedAt" to FieldValue.serverTimestamp()
-        )
-
         // Peso
-        val frecuenciaPeso = when (rgPeso.checkedRadioButtonId) {
-            R.id.rbPeso15 -> "quincenal"
-            R.id.rbPeso30 -> "mensual"
-            else -> "semanal"
+        val frecuenciaPesoDias = when (rgPeso.checkedRadioButtonId) {
+            R.id.rbPeso15 -> 15
+            R.id.rbPeso30 -> 30
+            else -> 7
         }
 
-        val pesoData = hashMapOf(
-            "tipo" to "peso",
-            "frecuenciaPeso" to frecuenciaPeso,
-            "enabled" to checkPesoEnabled.isChecked,
+        val data = hashMapOf(
+            "aguaEnabled" to checkAguaEnabled.isChecked,
+            "aguaIntervaloMinutos" to intervaloAgua,
+            "pesoEnabled" to checkPesoEnabled.isChecked,
+            "pesoFrecuenciaDias" to frecuenciaPesoDias,
             "horaInicio" to horaInicio,
+            "minutoInicio" to minutoInicio,
             "horaFin" to horaFin,
+            "minutoFin" to minutoFin,
             "updatedAt" to FieldValue.serverTimestamp()
         )
 
-        remindersRef.document("agua").set(aguaData)
+        val docRef = db.collection("users")
+            .document(user.uid)
+            .collection("settings")
+            .document("reminders")
+
+        docRef.set(data, SetOptions.merge())
             .addOnSuccessListener {
-                remindersRef.document("peso").set(pesoData)
-                    .addOnSuccessListener {
-                        Toast.makeText(
-                            requireContext(),
-                            "Recordatorios guardados",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(
-                            requireContext(),
-                            "Error guardando recordatorio de peso: ${e.localizedMessage}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                Toast.makeText(
+                    requireContext(),
+                    "Recordatorios guardados",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             .addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(),
-                    "Error guardando recordatorio de agua: ${e.localizedMessage}",
+                    "Error al guardar recordatorios: ${e.localizedMessage}",
                     Toast.LENGTH_LONG
                 ).show()
             }
