@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <receiver android:name="com.urasweb.aqualife.WaterReminderReceiver" android:exported="false" />
+        <receiver android:name="com.urasweb.aqualife.WeightReminderReceiver" android:exported="false" />
     </application>
 
 </manifest>
