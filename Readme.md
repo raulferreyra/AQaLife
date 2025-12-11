@@ -65,10 +65,10 @@ La app funciona completamente **offline** y almacena los datos en **SharedPrefer
 - [X] Agregar campo **Sexo**
 - [X] Validación revisada de medidas y pesos
 - [X] Validación revisada de fecha de nacimiento
-- [ ] Validaciones de perímetro abdominal
+- [X] Validaciones de perímetro abdominal
 
 ### 🌟 Nuevas funciones (Sprint 2)
-- [ ] Gráficos semanales de IMC e hidratación
+- [X] Gráficos semanales de IMC e hidratación
 - [X] Migración a base de datos local (Room DB)
 - [X] Sincronización con servidor (BD en la nube)
 - [ ] Nuevas medidas corporales

@@ -9,12 +9,12 @@
 - [X] Redondear IMC y valores mostrados a formato presentable (2 decimales fijo)
 - [X] Corregir medidas y pesos máximos y mínimos
 - [X] Corregir medidas de F. de Nacimiento
-- [ ] Corregir medidas de Perímetro abdominal
+- [X] Corregir medidas de Perímetro abdominal
 - [X] Revisar textos, ortografía y consistencia de nombres
 - [X] Actualizar README del proyecto (explicar funcionamiento)
-- [ ] Siguiente versión:
-  - [ ] Sección de medidas (Globales / imperiales) 
-  - [ ] Agregar gráficos (Semanales)
+- [X] Siguiente versión:
+  - [X] Sección de medidas (Globales / imperiales) 
+  - [X] Agregar gráficos (Semanales)
   - [X] Agregar Base de datos
   - [X] Agregar función de Sincronización (BD local con BD nube)
   - [ ] Agregar Otras medidas
