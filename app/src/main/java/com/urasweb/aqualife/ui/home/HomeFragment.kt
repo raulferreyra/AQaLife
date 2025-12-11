@@ -78,12 +78,64 @@ class HomeFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val freqMin = prefs.getInt(KEY_FREQ_MINUTOS, 60)
 
-        // Cargar historial (últimos 5), actualizar prefs con el último registro
-        // y luego renderizar el dashboard con esos datos
-        viewLifecycleOwner.lifecycleScope.launch {
-            actualizarDesdeHistorialImc(prefs)
-            renderizarDashboard(prefs, freqMin)
+        // Primero cargamos las unidades desde Firestore a prefs
+        cargarUnidadesEnPrefs(prefs) {
+            // Luego, ya con unidades disponibles, cargamos historial y renderizamos dashboard
+            viewLifecycleOwner.lifecycleScope.launch {
+                actualizarDesdeHistorialImc(prefs)
+                renderizarDashboard(prefs, freqMin)
+            }
         }
+    }
+
+    // --------------------------------------------------------------------
+    // Unidades: leer de Firestore y guardar en SharedPreferences
+    // --------------------------------------------------------------------
+    private fun cargarUnidadesEnPrefs(prefs: SharedPreferences, onComplete: () -> Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+
+        if (user == null) {
+            // Si no hay usuario, dejamos métricas por defecto
+            prefs.edit()
+                .putString(KEY_LENGTH_UNIT, "cm")
+                .putString(KEY_WEIGHT_UNIT, "kg")
+                .putString(KEY_VOLUME_UNIT, "ml")
+                .apply()
+            onComplete()
+            return
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .document(user.uid)
+            .collection("settings")
+            .document("units")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val lengthUnit = snapshot.getString("lengthUnit") ?: "cm"
+                val weightUnit = snapshot.getString("weightUnit") ?: "kg"
+                val volumeUnit = snapshot.getString("volumeUnit") ?: "ml"
+
+                prefs.edit()
+                    .putString(KEY_LENGTH_UNIT, lengthUnit)
+                    .putString(KEY_WEIGHT_UNIT, weightUnit)
+                    .putString(KEY_VOLUME_UNIT, volumeUnit)
+                    .apply()
+
+                onComplete()
+            }
+            .addOnFailureListener {
+                // Si falla, aseguramos defaults si no existían
+                if (!prefs.contains(KEY_LENGTH_UNIT)) {
+                    prefs.edit()
+                        .putString(KEY_LENGTH_UNIT, "cm")
+                        .putString(KEY_WEIGHT_UNIT, "kg")
+                        .putString(KEY_VOLUME_UNIT, "ml")
+                        .apply()
+                }
+                onComplete()
+            }
     }
 
     // --------------------------------------------------------------------
@@ -116,7 +168,7 @@ class HomeFragment : Fragment() {
 
     // --------------------------------------------------------------------
     // 2) Leer últimos 5 registros de IMC desde Room y actualizar prefs
-    //    + gráfico histórico
+    //    + gráfico histórico (aplicando máscaras)
     // --------------------------------------------------------------------
     private suspend fun actualizarDesdeHistorialImc(prefs: SharedPreferences) {
         try {
@@ -147,22 +199,42 @@ class HomeFragment : Fragment() {
             val ordered = records.sortedBy { it.updatedAt }
             val last = ordered.last()
 
-            val pesoActual = last.pesoKg.toFloat()
+            val pesoActualMetric = last.pesoKg.toFloat()
             val tallaActualCm = (last.tallaM * 100f).toFloat()
-            val perimetroActual = last.perimetroAbdominalCm.toFloat()
+            val perimetroActualMetric = last.perimetroAbdominalCm.toFloat()
 
-            // Actualizar prefs para que el Dashboard siempre use el último registro
+            // Actualizar prefs con el último registro (siempre en métrico)
             prefs.edit()
-                .putFloat(KEY_PESO, pesoActual)
+                .putFloat(KEY_PESO, pesoActualMetric)
                 .putFloat(KEY_ALTURA, tallaActualCm)
-                .putFloat(KEY_PERIMETRO_ABD, perimetroActual)
+                .putFloat(KEY_PERIMETRO_ABD, perimetroActualMetric)
                 .apply()
 
-            // Datos para el gráfico (solo hasta 5)
-            val pesos = ordered.map { it.pesoKg.toFloat() }
-            val perimetros = ordered.map { it.perimetroAbdominalCm.toFloat() }
+            // Datos en métrico
+            val pesosMetric = ordered.map { it.pesoKg.toFloat() }
+            val perimetrosMetric = ordered.map { it.perimetroAbdominalCm.toFloat() }
 
-            imcHistoryChart.setData(pesos, perimetros)
+            // Aplicar máscaras según unidades guardadas
+            val lengthUnit = prefs.getString(KEY_LENGTH_UNIT, "cm") ?: "cm"
+            val weightUnit = prefs.getString(KEY_WEIGHT_UNIT, "kg") ?: "kg"
+
+            val pesosDisplay = pesosMetric.map { peso ->
+                if (weightUnit == "lb") {
+                    (peso * 2.20462f)
+                } else {
+                    peso
+                }
+            }
+
+            val perimetrosDisplay = perimetrosMetric.map { per ->
+                if (lengthUnit == "ft") {
+                    (per / 30.48f)
+                } else {
+                    per
+                }
+            }
+
+            imcHistoryChart.setData(pesosDisplay, perimetrosDisplay)
             txtHistoricoTitle.visibility = View.VISIBLE
             imcHistoryChart.visibility = View.VISIBLE
 
@@ -179,19 +251,35 @@ class HomeFragment : Fragment() {
     }
 
     // --------------------------------------------------------------------
-    // 3) Renderizar Dashboard con datos en SharedPreferences
+    // 3) Renderizar Dashboard con datos en SharedPreferences (máscaras)
     // --------------------------------------------------------------------
     private fun renderizarDashboard(prefs: SharedPreferences, freqMin: Int) {
-        // PERÍMETRO ABDOMINAL + GAUGE
-        val perimetro = prefs.getFloat(KEY_PERIMETRO_ABD, 0f)
+        val lengthUnit = prefs.getString(KEY_LENGTH_UNIT, "cm") ?: "cm"
+        val weightUnit = prefs.getString(KEY_WEIGHT_UNIT, "kg") ?: "kg"
 
-        if (perimetro > 0f) {
-            val textoPerimetro = "Perímetro abdominal: ${"%.1f".format(perimetro)} cm"
+        // PERÍMETRO ABDOMINAL + GAUGE
+        val perimetroMetric = prefs.getFloat(KEY_PERIMETRO_ABD, 0f)
+
+        if (perimetroMetric > 0f) {
+            // Para texto aplicamos máscara
+            val perimetroDisplay: Float
+            val perimetroUnitLabel: String
+            if (lengthUnit == "ft") {
+                perimetroDisplay = perimetroMetric / 30.48f
+                perimetroUnitLabel = "ft"
+            } else {
+                perimetroDisplay = perimetroMetric
+                perimetroUnitLabel = "cm"
+            }
+
+            val textoPerimetro =
+                "Perímetro abdominal: ${"%.1f".format(perimetroDisplay)} $perimetroUnitLabel"
             txtPerimetro.text = textoPerimetro
 
+            // El riesgo se calcula SIEMPRE en cm (métrico)
             val riesgo = when {
-                perimetro < 80f -> "Riesgo bajo por grasa abdominal."
-                perimetro < 94f -> "Riesgo moderado por grasa abdominal."
+                perimetroMetric < 80f -> "Riesgo bajo por grasa abdominal."
+                perimetroMetric < 94f -> "Riesgo moderado por grasa abdominal."
                 else -> "Riesgo alto por grasa abdominal."
             }
             txtRiesgoPerimetro.text = riesgo
@@ -199,14 +287,15 @@ class HomeFragment : Fragment() {
             txtPerimetro.visibility = View.VISIBLE
             txtRiesgoPerimetro.visibility = View.VISIBLE
 
-            abdGauge.setPerimetro(perimetro)
+            // Gauge en escala métrica
+            abdGauge.setPerimetro(perimetroMetric)
         } else {
             txtPerimetro.visibility = View.GONE
             txtRiesgoPerimetro.visibility = View.GONE
             abdGauge.setPerimetro(0f)
         }
 
-        // Notificaciones por día
+        // Notificaciones por día (config antigua, la mantenemos)
         val notificacionesPorDia = when (freqMin) {
             30 -> 20
             60 -> 10
@@ -222,11 +311,11 @@ class HomeFragment : Fragment() {
         }
 
         val alturaCm = prefs.getFloat(KEY_ALTURA, 0f)
-        val pesoKg = prefs.getFloat(KEY_PESO, 0f)
+        val pesoKgMetric = prefs.getFloat(KEY_PESO, 0f)
         val fechaNac = prefs.getString(KEY_FECHA, "-")
 
-        // Cálculo de IMC + recomendación de agua
-        val imc = calcularImc(pesoKg, alturaCm)
+        // Cálculo de IMC SIEMPRE en métrico
+        val imc = calcularImc(pesoKgMetric, alturaCm)
         val rec = obtenerRecomendacion(imc)
 
         val litrosObjetivo = (rec.litrosMin + rec.litrosMax) / 2.0
@@ -248,16 +337,37 @@ class HomeFragment : Fragment() {
 
         imcGauge.setImc(imc)
 
+        // Máscaras para peso y talla en el texto
+        val pesoDisplay: Float
+        val pesoUnitLabel: String
+        if (weightUnit == "lb") {
+            pesoDisplay = pesoKgMetric * 2.20462f
+            pesoUnitLabel = "lb"
+        } else {
+            pesoDisplay = pesoKgMetric
+            pesoUnitLabel = "kg"
+        }
+
+        val alturaDisplay: Float
+        val alturaUnitLabel: String
+        if (lengthUnit == "ft") {
+            alturaDisplay = alturaCm / 30.48f
+            alturaUnitLabel = "ft"
+        } else {
+            alturaDisplay = alturaCm
+            alturaUnitLabel = "cm"
+        }
+
         val textoDatos = """
-            Peso: ${"%.1f".format(pesoKg)} kg
-            Talla: ${"%.1f".format(alturaCm)} cm
+            Peso: ${"%.1f".format(pesoDisplay)} $pesoUnitLabel
+            Talla: ${"%.1f".format(alturaDisplay)} $alturaUnitLabel
             Fecha nacimiento: $fechaNac
         """.trimIndent()
         txtResumenDatos.text = textoDatos
     }
 
     // --------------------------------------------------------------------
-    // 4) Lógica de IMC / Agua / Notificaciones (la que ya tenías)
+    // 4) Lógica de IMC / Agua / Notificaciones (igual que antes)
     // --------------------------------------------------------------------
     private fun calcularImc(pesoKg: Float, tallaCm: Float): Double {
         val tallaM = tallaCm / 100f
@@ -347,5 +457,10 @@ class HomeFragment : Fragment() {
         private const val KEY_FECHA = "fecha_nac"
         private const val KEY_FREQ_MINUTOS = "60"
         private const val KEY_PERIMETRO_ABD = "perimetro_abd"
+
+        // Unidades guardadas como "máscaras"
+        private const val KEY_LENGTH_UNIT = "units_length"
+        private const val KEY_WEIGHT_UNIT = "units_weight"
+        private const val KEY_VOLUME_UNIT = "units_volume"
     }
 }
