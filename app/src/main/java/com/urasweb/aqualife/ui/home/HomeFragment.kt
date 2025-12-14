@@ -190,7 +190,7 @@ class HomeFragment : Fragment() {
             val records: List<ImcRecordEntity> =
                 AquaRepository.getLastImcRecordsForCurrentUser(limit = 5)
 
-            if (records.isEmpty()) {
+            if (records.size < 2) {
                 txtHistoricoTitle.visibility = View.GONE
                 imcHistoryChart.visibility = View.GONE
                 return
@@ -261,6 +261,7 @@ class HomeFragment : Fragment() {
         val perimetroMetric = prefs.getFloat(KEY_PERIMETRO_ABD, 0f)
 
         if (perimetroMetric > 0f) {
+            abdGauge.visibility = View.VISIBLE
             // Para texto aplicamos máscara
             val perimetroDisplay: Float
             val perimetroUnitLabel: String
@@ -292,7 +293,7 @@ class HomeFragment : Fragment() {
         } else {
             txtPerimetro.visibility = View.GONE
             txtRiesgoPerimetro.visibility = View.GONE
-            abdGauge.setPerimetro(0f)
+            abdGauge.visibility = View.GONE
         }
 
         // Notificaciones por día (config antigua, la mantenemos)
